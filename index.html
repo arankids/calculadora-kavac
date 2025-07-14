@@ -124,24 +124,25 @@
     });
 
     function calcularFoam() {
-      const cantidad = parseInt(document.getElementById('cantidadFoam').value);
-      const alto = parseFloat(document.getElementById('altoFoam').value) / 100; // convertir a metros
-      const ancho = parseFloat(document.getElementById('anchoFoam').value) / 100; // convertir a metros
+  const cantidad = parseInt(document.getElementById('cantidadFoam').value);
+  const alto = parseFloat(document.getElementById('altoFoam').value) / 100; // convertir cm a m
+  const ancho = parseFloat(document.getElementById('anchoFoam').value) / 100;
 
-      const areaFigura = alto * ancho;
-      const areaTotal = areaFigura * cantidad;
+  const areaFigura = alto * ancho;
+  const areaTotal = areaFigura * cantidad;
 
-      const costoCartonPluma = 12000 / 2.88; // costo por m²
-      const costoImpresion = 7500; // por m²
-      const pegamento = 1500 * cantidad;
+  const costoCartonPluma = 12000 / 2.88; // $12.000 / 2.88 m²
+  const costoImpresion = 7500; // por m²
+  const pegamento = 1500; // costo fijo por proyecto
 
-      const costoMateriales = areaTotal * (costoCartonPluma + costoImpresion);
-      const costoBase = costoMateriales + pegamento;
+  const costoMateriales = areaTotal * (costoCartonPluma + costoImpresion);
+  const costoBase = costoMateriales + pegamento;
 
-      const ganancia = 0.60;
-      const precioFinal = Math.round(costoBase * (1 + ganancia));
+  const ganancia = 0.60;
+  const precioFinal = Math.round(costoBase * (1 + ganancia));
 
-      document.getElementById('resultadoFoam').innerText =
-        `Área total: ${areaTotal.toFixed(2)} m²
+  document.getElementById('resultadoFoam').innerText =
+    `Área total: ${areaTotal.toFixed(2)} m²
 Costo base: $${Math.round(costoBase).toLocaleString('es-CL')}
-Precio final con ganancia: $${precioFinal.toLocaleString('es-CL
+Precio final con ganancia: $${precioFinal.toLocaleString('es-CL')}`;
+}
