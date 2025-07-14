@@ -3,48 +3,73 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Kavac Studio</title>
-  <link rel="manifest" href="manifest.json" />
+  <title>Kavac Studio - Calculadora</title>
+  <link rel="manifest" href="manifest.json">
   <style>
     body {
       font-family: sans-serif;
-      background: #fefefe;
+      background: #fafafa;
       text-align: center;
-      color: #333;
+      padding: 20px;
     }
     .container {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
       max-width: 600px;
       margin: auto;
-      padding: 1rem;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
-    h1 {
-      color: #00b8b8;
+    input, select, button {
+      margin: 5px;
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 16px;
     }
-    select, input, button {
-      padding: 0.5rem;
-      margin: 0.5rem;
-      font-size: 1rem;
+    .small-input {
+      width: 80px;
     }
-    button {
-      background-color: #00b8b8;
+    .figure-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 5px;
+      margin: 5px 0;
+    }
+    .remove-btn {
+      background: #ff5c5c;
       color: white;
       border: none;
-      cursor: pointer;
+      padding: 6px 10px;
       border-radius: 5px;
+      cursor: pointer;
     }
-    button:hover {
-      background-color: #009090;
+    .result {
+      margin-top: 20px;
+      background: #e0f7fa;
+      padding: 15px;
+      border-radius: 10px;
+    }
+    .toggle-btn {
+      background: #00bcd4;
+      color: white;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 10px;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <img src="logo.png" alt="Kavac Studio" width="80">
-    <h1>Kavac Studio</h1>
+    <img src="logo.png" alt="Kavac Studio" width="100" />
+    <h1 style="color: #00bcd4">Kavac Studio</h1>
     <p>Calculadora para impresión Foam y DTF</p>
 
-    <label><strong>¿Qué deseas calcular?</strong></label>
-    <select id="tipoCalculo" onchange="cambiarFormulario()">
+    <label>¿Qué deseas calcular?</label>
+    <select id="tipo">
       <option value="foam">Imagen de Foam</option>
       <option value="dtf">Impresión DTF</option>
     </select>
@@ -54,77 +79,125 @@
   </div>
 
   <script>
-    const foamPrecioImpresion = 11500; // por m²
-    const foamGanancia = 0.6;
-    const foamPrecioPliego = 12000; // por pliego 2.4 x 1.2m
+    const tipoSelect = document.getElementById("tipo");
+    const formulario = document.getElementById("formulario");
+    const resultado = document.getElementById("resultado");
 
-    const dtfPrecio29 = 9990;  // por metro lineal
-    const dtfPrecio58 = 18990; // por metro lineal
+    let figuras = [];
 
-    function cambiarFormulario() {
-      const tipo = document.getElementById('tipoCalculo').value;
-      const form = document.getElementById('formulario');
-      const resultado = document.getElementById('resultado');
-      resultado.innerHTML = '';
-      if (tipo === 'foam') {
-        form.innerHTML = `
-          <input type="number" id="alto" placeholder="Alto (cm)" />
-          <input type="number" id="ancho" placeholder="Ancho (cm)" />
-          <input type="number" id="cantidad" placeholder="Cantidad" />
-          <button onclick="calcularFoam()">Calcular Foam</button>
-        `;
+    function renderFoamForm() {
+      formulario.innerHTML = `
+        <div class="figure-row">
+          <input type="number" class="small-input" id="alto" placeholder="Alto (cm)">
+          <input type="number" class="small-input" id="ancho" placeholder="Ancho (cm)">
+          <input type="number" class="small-input" id="cantidad" placeholder="Cantidad">
+          <button onclick="agregarFigura()">Agregar figura</button>
+        </div>
+        <div id="listaFiguras"></div>
+        <button onclick="calcularFoam()">Calcular Foam</button>
+        <button onclick="nuevoCalculo()">Nuevo cálculo</button>
+      `;
+    }
+
+    function renderDTFForm() {
+      formulario.innerHTML = `
+        <p>Pronto disponible...</p>
+      `;
+    }
+
+    function renderFormulario() {
+      resultado.innerHTML = "";
+      figuras = [];
+      if (tipoSelect.value === "foam") {
+        renderFoamForm();
       } else {
-        form.innerHTML = `
-          <input type="number" id="anchoImg" placeholder="Ancho (cm)" />
-          <input type="number" id="altoImg" placeholder="Alto (cm)" />
-          <input type="number" id="cantidadImg" placeholder="Cantidad" />
-          <select id="anchoLienzo">
-            <option value="29">Ancho lienzo: 29 cm</option>
-            <option value="58">Ancho lienzo: 58 cm</option>
-          </select>
-          <button onclick="calcularDTF()">Calcular DTF</button>
-        `;
+        renderDTFForm();
       }
     }
 
+    function agregarFigura() {
+      const alto = parseFloat(document.getElementById("alto").value);
+      const ancho = parseFloat(document.getElementById("ancho").value);
+      const cantidad = parseInt(document.getElementById("cantidad").value);
+
+      if (!alto || !ancho || !cantidad) {
+        alert("Completa todos los campos.");
+        return;
+      }
+
+      figuras.push({ alto, ancho, cantidad });
+      mostrarFiguras();
+    }
+
+    function eliminarFigura(index) {
+      figuras.splice(index, 1);
+      mostrarFiguras();
+    }
+
+    function mostrarFiguras() {
+      const lista = document.getElementById("listaFiguras");
+      lista.innerHTML = figuras.map((figura, i) => `
+        <div class="figure-row">
+          <input type="text" class="small-input" value="${figura.alto}" disabled>
+          <input type="text" class="small-input" value="${figura.ancho}" disabled>
+          <input type="text" class="small-input" value="${figura.cantidad}" disabled>
+          <button class="remove-btn" onclick="eliminarFigura(${i})">X</button>
+        </div>
+      `).join('');
+    }
+
     function calcularFoam() {
-      const alto = parseFloat(document.getElementById('alto').value) / 100;
-      const ancho = parseFloat(document.getElementById('ancho').value) / 100;
-      const cantidad = parseInt(document.getElementById('cantidad').value);
-      const areaTotal = alto * ancho * cantidad;
-      const costoBase = areaTotal * foamPrecioImpresion;
-      const ganancia = costoBase * foamGanancia;
-      const precioFinal = costoBase + ganancia;
-      document.getElementById('resultado').innerHTML = `
-        <h3>Total estimado: $${precioFinal.toFixed(0)}</h3>
-        <p>Área: ${areaTotal.toFixed(2)} m²</p>
-        <p>Costo base: $${costoBase.toFixed(0)}</p>
-        <p>Ganancia (60%): $${ganancia.toFixed(0)}</p>
+      if (figuras.length === 0) {
+        alert("Debes agregar al menos una figura.");
+        return;
+      }
+
+      let areaTotal = 0;
+      let desglose = "";
+
+      figuras.forEach(f => {
+        const area = (f.alto / 100) * (f.ancho / 100) * f.cantidad;
+        areaTotal += area;
+        desglose += `🔹 ${f.cantidad} figura(s) de ${f.alto}x${f.ancho} cm = ${(area).toFixed(2)} m²<br>`;
+      });
+
+      const costoBase = areaTotal * (12000 / (2.4 * 1.2)) + areaTotal * 11500;
+      const ganancia = costoBase * 0.6;
+      const total = costoBase + ganancia;
+
+      resultado.innerHTML = `
+        <div class="result">
+          <h3>📄 Total estimado: $${total.toLocaleString(undefined, {minimumFractionDigits: 3, maximumFractionDigits: 3})}</h3>
+          <button class="toggle-btn" onclick="mostrarDesglose(this)">Mostrar desglose</button>
+          <div id="desglose" style="display:none;text-align:left;margin-top:10px;">
+            🔍 <strong>Desglose:</strong><br>
+            ${desglose}
+            <br>📐 Área total: ${areaTotal.toFixed(2)} m²
+            <br>💰 Costo base: $${costoBase.toFixed(3)}
+            <br>📈 Ganancia (60%): $${ganancia.toFixed(3)}
+            <br>🤑 Precio final: $${total.toFixed(3)}
+          </div>
+        </div>
       `;
     }
 
-    function calcularDTF() {
-      const anchoImg = parseFloat(document.getElementById('anchoImg').value);
-      const altoImg = parseFloat(document.getElementById('altoImg').value);
-      const cantidad = parseInt(document.getElementById('cantidadImg').value);
-      const anchoLienzo = parseInt(document.getElementById('anchoLienzo').value);
-
-      const imagenesPorFila = Math.floor(anchoLienzo / anchoImg);
-      const filasNecesarias = Math.ceil(cantidad / imagenesPorFila);
-      const largoNecesario = filasNecesarias * altoImg;
-
-      const precioPorMetro = anchoLienzo === 29 ? dtfPrecio29 : dtfPrecio58;
-      const largoEnMetros = largoNecesario / 100;
-      const precioFinal = largoEnMetros * precioPorMetro;
-
-      document.getElementById('resultado').innerHTML = `
-        <h3>Total estimado: $${precioFinal.toFixed(0)}</h3>
-        <p>Alto total requerido: ${largoNecesario.toFixed(1)} cm</p>
-        <p>Imágenes por fila: ${imagenesPorFila}</p>
-      `;
+    function mostrarDesglose(btn) {
+      const desglose = document.getElementById("desglose");
+      if (desglose.style.display === "none") {
+        desglose.style.display = "block";
+        btn.textContent = "Ocultar desglose";
+      } else {
+        desglose.style.display = "none";
+        btn.textContent = "Mostrar desglose";
+      }
     }
 
-    cambiarFormulario(); // inicial
+    function nuevoCalculo() {
+      renderFormulario();
+    }
+
+    tipoSelect.addEventListener("change", renderFormulario);
+    renderFormulario();
   </script>
 </body>
 </html>
