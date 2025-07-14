@@ -45,4 +45,186 @@
       margin: 10px 0;
       border-radius: 5px;
       border: 1px solid #ccc;
-      font-size: 1
+      font-size: 16px;
+    }
+
+    button {
+      background-color: #00C8D7;
+      color: white;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .resultado {
+      background: #e0f7fa;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 5px;
+      white-space: pre-wrap;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .input-row {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .input-row input {
+      width: 80px;
+      padding: 5px;
+    }
+
+    .label-small {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+  </style>
+</head>
+<body>
+  <img src="logo-kavac-studio.png" alt="Logo Kavac Studio" class="logo" />
+  <h1>Kavac Studio</h1>
+  <p>Calculadora para impresión Foam y DTF</p>
+
+  <div class="container">
+    <label for="tipo">¿Qué deseas calcular?</label>
+    <select id="tipo">
+      <option value="">Seleccionar...</option>
+      <option value="foam">Imagen de Foam</option>
+      <option value="dtf">Impresión DTF</option>
+    </select>
+
+    <!-- Formulario Foam -->
+    <div id="foamForm" class="hidden">
+      <div id="figurasContainer"></div>
+      <button onclick="agregarFigura()">Agregar figura</button>
+      <button onclick="calcularFoam()">Calcular Foam</button>
+      <div id="resultadoFoam" class="resultado hidden"></div>
+      <div id="desgloseFoam" class="resultado hidden"></div>
+    </div>
+
+    <!-- Formulario DTF -->
+    <div id="dtfForm" class="hidden">
+      <label for="cantidadDtf">¿Cuántas imágenes?</label>
+      <input type="number" id="cantidadDtf" min="1" />
+      <label for="tamañoDtf">Tamaño de cada imagen (cm)</label>
+      <input type="number" id="tamañoDtf" min="1" />
+      <label for="anchoDtf">Ancho del lienzo</label>
+      <select id="anchoDtf">
+        <option value="29">29 cm</option>
+        <option value="58">58 cm</option>
+      </select>
+      <button onclick="calcularDTF()">Calcular DTF</button>
+      <div id="resultadoDtf" class="resultado"></div>
+    </div>
+  </div>
+
+<script>
+  const tipo = document.getElementById('tipo');
+  const foamForm = document.getElementById('foamForm');
+  const dtfForm = document.getElementById('dtfForm');
+  const figurasContainer = document.getElementById('figurasContainer');
+
+  tipo.addEventListener('change', () => {
+    foamForm.classList.add('hidden');
+    dtfForm.classList.add('hidden');
+    document.getElementById('resultadoFoam').classList.add('hidden');
+    document.getElementById('desgloseFoam').classList.add('hidden');
+
+    if (tipo.value === 'foam') foamForm.classList.remove('hidden');
+    if (tipo.value === 'dtf') dtfForm.classList.remove('hidden');
+  });
+
+  function agregarFigura() {
+    const index = figurasContainer.children.length + 1;
+    const row = document.createElement('div');
+    row.className = 'input-row';
+    row.innerHTML = `
+      <input type="number" placeholder="Alto" id="alto${index}" min="1">
+      <input type="number" placeholder="Ancho" id="ancho${index}" min="1">
+      <input type="number" placeholder="Cant." id="cantidad${index}" min="1">
+    `;
+    figurasContainer.appendChild(row);
+  }
+
+  function calcularFoam() {
+    const precioCartonPluma = 12000;
+    const areaLamina = 2.4 * 1.2;
+    const precioCartonPorM2 = precioCartonPluma / areaLamina;
+
+    const precioImpresionPorM2 = 8000;
+    const ganancia = 0.5;
+
+    let areaTotal = 0;
+    let desglose = '';
+
+    const count = figurasContainer.children.length;
+    if (count === 0) {
+      alert("Agrega al menos una figura.");
+      return;
+    }
+
+    for (let i = 1; i <= count; i++) {
+      const alto = parseFloat(document.getElementById(`alto${i}`).value) / 100;
+      const ancho = parseFloat(document.getElementById(`ancho${i}`).value) / 100;
+      const cantidad = parseInt(document.getElementById(`cantidad${i}`).value);
+
+      if (!alto || !ancho || !cantidad) {
+        alert("Completa todos los campos.");
+        return;
+      }
+
+      const area = alto * ancho * cantidad;
+      areaTotal += area;
+
+      desglose += `Figura ${i}: ${cantidad} de ${alto * 100}x${ancho * 100} cm = ${area.toFixed(2)} m²\n`;
+    }
+
+    const costoBase = areaTotal * (precioCartonPorM2 + precioImpresionPorM2);
+    const gananciaValor = costoBase * ganancia;
+    const total = costoBase + gananciaValor;
+
+    document.getElementById('resultadoFoam').innerText =
+      `🔹 Área total: ${areaTotal.toFixed(2)} m²\n🔸 Precio final: $${Math.round(total).toLocaleString('es-CL')}`;
+    document.getElementById('resultadoFoam').classList.remove('hidden');
+
+    document.getElementById('desgloseFoam').innerText =
+      `${desglose}\nCosto base: $${Math.round(costoBase).toLocaleString('es-CL')}\nGanancia (50%): $${Math.round(gananciaValor).toLocaleString('es-CL')}`;
+    document.getElementById('desgloseFoam').classList.add('hidden');
+
+    const btn = document.createElement('button');
+    btn.innerText = "Ver desglose";
+    btn.onclick = () => {
+      document.getElementById('desgloseFoam').classList.toggle('hidden');
+    };
+    document.getElementById('resultadoFoam').appendChild(btn);
+  }
+
+  function calcularDTF() {
+    const cantidad = parseInt(document.getElementById('cantidadDtf').value);
+    const tamaño = parseInt(document.getElementById('tamañoDtf').value);
+    const ancho = parseInt(document.getElementById('anchoDtf').value);
+    const porFila = Math.floor(ancho / tamaño);
+    const filas = Math.ceil(cantidad / porFila);
+    const largo = filas * tamaño;
+    const precioPorMetro = ancho === 29 ? 9990 : 18990;
+    const metros = Math.ceil(largo / 100);
+    const precioTotal = metros * precioPorMetro;
+
+    document.getElementById('resultadoDtf').innerText = 
+      `Largo necesario: ${largo} cm\nPrecio estimado: $${precioTotal.toLocaleString('es-CL')}`;
+  }
+
+  // Registrar PWA
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('service-worker.js')
+      .then(() => console.log("Service Worker registrado"));
+  }
+</script>
+</body>
+</html>
