@@ -80,33 +80,56 @@
 <body>
   <img src="logo.png" alt="Logo Kavac Studio" class="logo" />
   <h1>Kavac Studio</h1>
-  <p>Calculadora para impresión Foam</p>
+  <p>Calculadora para impresión Foam y DTF</p>
 
   <div class="container">
     <label>¿Qué deseas calcular?</label>
     <select id="tipo">
       <option value="foam">Imagen de Foam</option>
+      <option value="dtf">Impresión DTF</option>
     </select>
 
-    <div>
-      <input id="alto" type="number" placeholder="Alto" />
-      <input id="ancho" type="number" placeholder="Ancho" />
-      <input id="cantidad" type="number" placeholder="Cant." />
+    <!-- FOAM -->
+    <div id="foamSection">
+      <div>
+        <input id="alto" type="number" placeholder="Alto" />
+        <input id="ancho" type="number" placeholder="Ancho" />
+        <input id="cantidad" type="number" placeholder="Cant." />
+      </div>
+      <div id="figurasContainer"></div>
+      <button onclick="calcularFoam()">Calcular Foam</button>
+      <button onclick="resetFoam()">Nuevo cálculo</button>
+      <div id="resultadoFoam" class="resultado hidden"></div>
+      <button id="toggleDesgloseBtn" class="hidden" onclick="toggleDesglose()">Ver desglose</button>
+      <div id="desgloseFoam" class="desglose hidden"></div>
     </div>
 
-    <div id="figurasContainer"></div>
-
-    <button onclick="calcularFoam()">Calcular Foam</button>
-    <button onclick="resetFoam()">Nuevo cálculo</button>
-
-    <div id="resultadoFoam" class="resultado hidden"></div>
-    <button id="toggleDesgloseBtn" class="hidden" onclick="toggleDesglose()">Ver desglose</button>
-    <div id="desgloseFoam" class="desglose hidden"></div>
+    <!-- DTF -->
+    <div id="dtfSection" class="hidden">
+      <input id="cantidadDtf" type="number" placeholder="Cantidad" />
+      <input id="tamañoDtf" type="number" placeholder="Tamaño (cm)" />
+      <select id="anchoDtf">
+        <option value="29">29 cm</option>
+        <option value="58">58 cm</option>
+      </select>
+      <button onclick="calcularDTF()">Calcular DTF</button>
+      <button onclick="resetDTF()">Nuevo cálculo</button>
+      <div id="resultadoDtf" class="resultado hidden"></div>
+    </div>
   </div>
 
   <script>
-    let figuras = [];
+    const tipo = document.getElementById('tipo');
+    const foamSection = document.getElementById('foamSection');
+    const dtfSection = document.getElementById('dtfSection');
+    tipo.addEventListener('change', () => {
+      foamSection.classList.add('hidden');
+      dtfSection.classList.add('hidden');
+      if (tipo.value === 'foam') foamSection.classList.remove('hidden');
+      if (tipo.value === 'dtf') dtfSection.classList.remove('hidden');
+    });
 
+    let figuras = [];
     document.querySelectorAll('#alto, #ancho, #cantidad').forEach(input => {
       input.addEventListener('change', () => {
         const alto = parseFloat(document.getElementById('alto').value);
@@ -205,6 +228,36 @@
       document.getElementById('resultadoFoam').classList.add('hidden');
       document.getElementById('desgloseFoam').classList.add('hidden');
       document.getElementById('toggleDesgloseBtn').classList.add('hidden');
+    }
+
+    function calcularDTF() {
+      const cantidad = parseInt(document.getElementById('cantidadDtf').value);
+      const tamaño = parseInt(document.getElementById('tamañoDtf').value);
+      const ancho = parseInt(document.getElementById('anchoDtf').value);
+
+      if (!cantidad || !tamaño || cantidad < 1 || tamaño < 1) {
+        document.getElementById('resultadoDtf').innerText = "Por favor, ingresa valores válidos.";
+        document.getElementById('resultadoDtf').classList.remove('hidden');
+        return;
+      }
+
+      const porFila = Math.floor(ancho / tamaño);
+      const filas = Math.ceil(cantidad / porFila);
+      const largo = filas * tamaño;
+      const precioPorMetro = ancho === 29 ? 9990 : 18990;
+      const metros = Math.ceil(largo / 100);
+      const precioTotal = metros * precioPorMetro;
+
+      document.getElementById('resultadoDtf').innerText =
+        `📐 Largo necesario: ${largo} cm\n💵 Precio estimado: $${precioTotal.toLocaleString('es-CL')}`;
+      document.getElementById('resultadoDtf').classList.remove('hidden');
+    }
+
+    function resetDTF() {
+      document.getElementById('cantidadDtf').value = '';
+      document.getElementById('tamañoDtf').value = '';
+      document.getElementById('resultadoDtf').innerHTML = '';
+      document.getElementById('resultadoDtf').classList.add('hidden');
     }
   </script>
 </body>
