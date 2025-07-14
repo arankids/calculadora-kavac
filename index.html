@@ -54,6 +54,7 @@
       color: white;
       border: none;
       font-weight: bold;
+      cursor: pointer;
     }
 
     .resultado {
@@ -65,6 +66,17 @@
 
     .hidden {
       display: none;
+    }
+
+    .figura {
+      border: 1px dashed #ccc;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+
+    .figura h4 {
+      margin: 0 0 10px;
+      color: #00C8D7;
     }
   </style>
 </head>
@@ -83,11 +95,9 @@
 
     <!-- Formulario Foam -->
     <div id="foamForm" class="hidden">
-      <label for="cantidadFoam">¿Cuántas imágenes deseas?</label>
-      <input type="number" id="cantidadFoam" placeholder="Ej: 10" min="1" />
-      <label for="tamañoFoam">Tamaño de imagen (cm)</label>
-      <input type="number" id="tamañoFoam" placeholder="Ej: 10" min="1" />
-      <button onclick="calcularFoam()">Calcular Foam</button>
+      <div id="figurasContainer"></div>
+      <button onclick="agregarFigura()">+ Agregar figura</button>
+      <button onclick="calcularFoam()">Calcular Total Foam</button>
       <div id="resultadoFoam" class="resultado"></div>
     </div>
 
@@ -111,6 +121,7 @@
     const tipo = document.getElementById('tipo');
     const foamForm = document.getElementById('foamForm');
     const dtfForm = document.getElementById('dtfForm');
+    const figurasContainer = document.getElementById('figurasContainer');
 
     tipo.addEventListener('change', () => {
       foamForm.classList.add('hidden');
@@ -120,15 +131,57 @@
       if (tipo.value === 'dtf') dtfForm.classList.remove('hidden');
     });
 
+    function agregarFigura() {
+      const index = figurasContainer.children.length + 1;
+      const div = document.createElement('div');
+      div.className = 'figura';
+      div.innerHTML = `
+        <h4>Figura ${index}</h4>
+        <label>Alto (cm):</label>
+        <input type="number" class="alto" placeholder="Ej: 60" min="1" />
+        <label>Ancho (cm):</label>
+        <input type="number" class="ancho" placeholder="Ej: 50" min="1" />
+        <label>Cantidad:</label>
+        <input type="number" class="cantidad" placeholder="Ej: 2" min="1" />
+      `;
+      figurasContainer.appendChild(div);
+    }
+
     function calcularFoam() {
-      const cantidad = parseInt(document.getElementById('cantidadFoam').value);
-      const tamaño = parseInt(document.getElementById('tamañoFoam').value);
-      const ancho = 29; // fijo
-      const porFila = Math.floor(ancho / tamaño);
-      const filas = Math.ceil(cantidad / porFila);
-      const largo = filas * tamaño;
-      document.getElementById('resultadoFoam').innerText = 
-        `Necesitarás un lienzo de aproximadamente ${largo} cm de largo para ${cantidad} imágenes de ${tamaño}x${tamaño} cm.`;
+      const altos = document.querySelectorAll('.alto');
+      const anchos = document.querySelectorAll('.ancho');
+      const cantidades = document.querySelectorAll('.cantidad');
+
+      const precioCartonPorCm2 = 8000 / 28800;
+      const precioImpresionPorCm2 = 7500 / 10000;
+      const transporte = 4000;
+      const ganancia = 1.7;
+
+      let subtotal = 0;
+      let totalFiguras = 0;
+      let resumen = '';
+
+      for (let i = 0; i < altos.length; i++) {
+        const alto = parseFloat(altos[i].value);
+        const ancho = parseFloat(anchos[i].value);
+        const cantidad = parseInt(cantidades[i].value);
+
+        if (!alto || !ancho || !cantidad) continue;
+
+        const area = alto * ancho;
+        const costoUnitario = area * (precioCartonPorCm2 + precioImpresionPorCm2);
+        const costoConTransporte = costoUnitario + (transporte / (altos.length || 1));
+        const precioFinal = costoConTransporte * ganancia;
+        const totalFigura = precioFinal * cantidad;
+
+        subtotal += totalFigura;
+        totalFiguras += cantidad;
+
+        resumen += `Figura ${i + 1}: ${cantidad} x ${alto}x${ancho} cm → $${totalFigura.toFixed(0).toLocaleString('es-CL')}\n`;
+      }
+
+      document.getElementById('resultadoFoam').innerText =
+        `Total figuras: ${totalFiguras}\n${resumen}\nTotal general: $${subtotal.toFixed(0).toLocaleString('es-CL')}`;
     }
 
     function calcularDTF() {
@@ -154,4 +207,3 @@
   </script>
 </body>
 </html>
-
