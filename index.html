@@ -54,7 +54,6 @@
       color: white;
       border: none;
       font-weight: bold;
-      cursor: pointer;
     }
 
     .resultado {
@@ -62,21 +61,11 @@
       padding: 10px;
       margin-top: 10px;
       border-radius: 5px;
+      white-space: pre-wrap;
     }
 
     .hidden {
       display: none;
-    }
-
-    .figura {
-      border: 1px dashed #ccc;
-      padding: 10px;
-      margin-bottom: 10px;
-    }
-
-    .figura h4 {
-      margin: 0 0 10px;
-      color: #00C8D7;
     }
   </style>
 </head>
@@ -95,18 +84,22 @@
 
     <!-- Formulario Foam -->
     <div id="foamForm" class="hidden">
-      <div id="figurasContainer"></div>
-      <button onclick="agregarFigura()">+ Agregar figura</button>
-      <button onclick="calcularFoam()">Calcular Total Foam</button>
+      <label for="cantidadFoam">¿Cuántas figuras?</label>
+      <input type="number" id="cantidadFoam" min="1" />
+      <label for="altoFoam">Alto de cada figura (cm)</label>
+      <input type="number" id="altoFoam" min="1" />
+      <label for="anchoFoam">Ancho de cada figura (cm)</label>
+      <input type="number" id="anchoFoam" min="1" />
+      <button onclick="calcularFoam()">Calcular Foam</button>
       <div id="resultadoFoam" class="resultado"></div>
     </div>
 
     <!-- Formulario DTF -->
     <div id="dtfForm" class="hidden">
       <label for="cantidadDtf">¿Cuántas imágenes?</label>
-      <input type="number" id="cantidadDtf" placeholder="Ej: 20" min="1" />
+      <input type="number" id="cantidadDtf" min="1" />
       <label for="tamañoDtf">Tamaño de cada imagen (cm)</label>
-      <input type="number" id="tamañoDtf" placeholder="Ej: 10" min="1" />
+      <input type="number" id="tamañoDtf" min="1" />
       <label for="anchoDtf">Ancho del lienzo</label>
       <select id="anchoDtf">
         <option value="29">29 cm</option>
@@ -121,7 +114,6 @@
     const tipo = document.getElementById('tipo');
     const foamForm = document.getElementById('foamForm');
     const dtfForm = document.getElementById('dtfForm');
-    const figurasContainer = document.getElementById('figurasContainer');
 
     tipo.addEventListener('change', () => {
       foamForm.classList.add('hidden');
@@ -131,79 +123,25 @@
       if (tipo.value === 'dtf') dtfForm.classList.remove('hidden');
     });
 
-    function agregarFigura() {
-      const index = figurasContainer.children.length + 1;
-      const div = document.createElement('div');
-      div.className = 'figura';
-      div.innerHTML = `
-        <h4>Figura ${index}</h4>
-        <label>Alto (cm):</label>
-        <input type="number" class="alto" placeholder="Ej: 60" min="1" />
-        <label>Ancho (cm):</label>
-        <input type="number" class="ancho" placeholder="Ej: 50" min="1" />
-        <label>Cantidad:</label>
-        <input type="number" class="cantidad" placeholder="Ej: 2" min="1" />
-      `;
-      figurasContainer.appendChild(div);
-    }
-
     function calcularFoam() {
-      const altos = document.querySelectorAll('.alto');
-      const anchos = document.querySelectorAll('.ancho');
-      const cantidades = document.querySelectorAll('.cantidad');
+      const cantidad = parseInt(document.getElementById('cantidadFoam').value);
+      const alto = parseFloat(document.getElementById('altoFoam').value) / 100; // convertir a metros
+      const ancho = parseFloat(document.getElementById('anchoFoam').value) / 100; // convertir a metros
 
-      const precioCartonPorCm2 = 8000 / 28800;
-      const precioImpresionPorCm2 = 7500 / 10000;
-      const transporte = 4000;
-      const ganancia = 1.7;
+      const areaFigura = alto * ancho;
+      const areaTotal = areaFigura * cantidad;
 
-      let subtotal = 0;
-      let totalFiguras = 0;
-      let resumen = '';
+      const costoCartonPluma = 12000 / 2.88; // costo por m²
+      const costoImpresion = 7500; // por m²
+      const pegamento = 1500 * cantidad;
 
-      for (let i = 0; i < altos.length; i++) {
-        const alto = parseFloat(altos[i].value);
-        const ancho = parseFloat(anchos[i].value);
-        const cantidad = parseInt(cantidades[i].value);
+      const costoMateriales = areaTotal * (costoCartonPluma + costoImpresion);
+      const costoBase = costoMateriales + pegamento;
 
-        if (!alto || !ancho || !cantidad) continue;
-
-        const area = alto * ancho;
-        const costoUnitario = area * (precioCartonPorCm2 + precioImpresionPorCm2);
-        const costoConTransporte = costoUnitario + (transporte / (altos.length || 1));
-        const precioFinal = costoConTransporte * ganancia;
-        const totalFigura = precioFinal * cantidad;
-
-        subtotal += totalFigura;
-        totalFiguras += cantidad;
-
-        resumen += `Figura ${i + 1}: ${cantidad} x ${alto}x${ancho} cm → $${totalFigura.toFixed(0).toLocaleString('es-CL')}\n`;
-      }
+      const ganancia = 0.60;
+      const precioFinal = Math.round(costoBase * (1 + ganancia));
 
       document.getElementById('resultadoFoam').innerText =
-        `Total figuras: ${totalFiguras}\n${resumen}\nTotal general: $${subtotal.toFixed(0).toLocaleString('es-CL')}`;
-    }
-
-    function calcularDTF() {
-      const cantidad = parseInt(document.getElementById('cantidadDtf').value);
-      const tamaño = parseInt(document.getElementById('tamañoDtf').value);
-      const ancho = parseInt(document.getElementById('anchoDtf').value);
-      const porFila = Math.floor(ancho / tamaño);
-      const filas = Math.ceil(cantidad / porFila);
-      const largo = filas * tamaño;
-      const precioPorMetro = ancho === 29 ? 9990 : 18990;
-      const metros = Math.ceil(largo / 100);
-      const precioTotal = metros * precioPorMetro;
-
-      document.getElementById('resultadoDtf').innerText = 
-        `Largo necesario: ${largo} cm\nPrecio estimado: $${precioTotal.toLocaleString('es-CL')}`;
-    }
-
-    // PWA Service Worker
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js')
-        .then(() => console.log("Service Worker registrado"));
-    }
-  </script>
-</body>
-</html>
+        `Área total: ${areaTotal.toFixed(2)} m²
+Costo base: $${Math.round(costoBase).toLocaleString('es-CL')}
+Precio final con ganancia: $${precioFinal.toLocaleString('es-CL
