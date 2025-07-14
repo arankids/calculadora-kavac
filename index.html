@@ -110,39 +110,51 @@
     </div>
   </div>
 
-  <script>
-    const tipo = document.getElementById('tipo');
-    const foamForm = document.getElementById('foamForm');
-    const dtfForm = document.getElementById('dtfForm');
+<script>
+  function calcularFoam() {
+    const cantidad = parseInt(document.getElementById('cantidadFoam').value);
+    const tamaño = parseInt(document.getElementById('tamañoFoam').value);
+    const resultadoDiv = document.getElementById('resultadoFoam');
 
-    tipo.addEventListener('change', () => {
-      foamForm.classList.add('hidden');
-      dtfForm.classList.add('hidden');
+    if (!cantidad || !tamaño || cantidad < 1 || tamaño < 1) {
+      resultadoDiv.innerHTML = "<strong>Por favor, ingresa valores válidos.</strong>";
+      return;
+    }
 
-      if (tipo.value === 'foam') foamForm.classList.remove('hidden');
-      if (tipo.value === 'dtf') dtfForm.classList.remove('hidden');
-    });
+    // Valores fijos
+    const precioCartonPluma = 12000;
+    const areaLamina = 2.4 * 1.2; // 2.88 m²
+    const precioCartonPorM2 = precioCartonPluma / areaLamina; // 4166.67
 
-    function calcularFoam() {
-  const cantidad = parseInt(document.getElementById('cantidadFoam').value);
-  const alto = parseFloat(document.getElementById('altoFoam').value) / 100; // convertir cm a m
-  const ancho = parseFloat(document.getElementById('anchoFoam').value) / 100;
+    const precioImpresionPorM2 = 8000;
+    const ganancia = 0.5;
 
-  const areaFigura = alto * ancho;
-  const areaTotal = areaFigura * cantidad;
+    // Cálculo de área por figura
+    const alto = tamaño / 100; // en metros
+    const ancho = tamaño / 100;
+    const areaPorFigura = alto * ancho;
+    const areaTotal = areaPorFigura * cantidad;
 
-  const costoCartonPluma = 12000 / 2.88; // $12.000 / 2.88 m²
-  const costoImpresion = 7500; // por m²
-  const pegamento = 1500; // costo fijo por proyecto
+    // Costos base
+    const costoMateriales = areaTotal * (precioCartonPorM2 + precioImpresionPorM2);
+    const precioFinal = costoMateriales * (1 + ganancia);
+    const precioPorFigura = precioFinal / cantidad;
 
-  const costoMateriales = areaTotal * (costoCartonPluma + costoImpresion);
-  const costoBase = costoMateriales + pegamento;
+    // Mostrar resultado con desglose
+    resultadoDiv.innerHTML = `
+      <strong>Desglose del cálculo:</strong><br>
+      🔹 Área total usada: ${areaTotal.toFixed(2)} m²<br>
+      🔹 Costo base (cartón + impresión): $${Math.round(costoMateriales).toLocaleString('es-CL')}<br>
+      🔹 Ganancia (50%): $${Math.round(costoMateriales * ganancia).toLocaleString('es-CL')}<br>
+      <strong>🔸 Precio final: $${Math.round(precioFinal).toLocaleString('es-CL')}</strong><br>
+      🔹 Precio por figura: $${Math.round(precioPorFigura).toLocaleString('es-CL')}<br><br>
+      <button onclick="resetFoam()">Nuevo cálculo</button>
+    `;
+  }
 
-  const ganancia = 0.60;
-  const precioFinal = Math.round(costoBase * (1 + ganancia));
-
-  document.getElementById('resultadoFoam').innerText =
-    `Área total: ${areaTotal.toFixed(2)} m²
-Costo base: $${Math.round(costoBase).toLocaleString('es-CL')}
-Precio final con ganancia: $${precioFinal.toLocaleString('es-CL')}`;
-}
+  function resetFoam() {
+    document.getElementById('cantidadFoam').value = '';
+    document.getElementById('tamañoFoam').value = '';
+    document.getElementById('resultadoFoam').innerHTML = '';
+  }
+</script>
