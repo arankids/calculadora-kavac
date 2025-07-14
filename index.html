@@ -1,181 +1,156 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Calculadora Kavac Studio</title>
+  <meta name="theme-color" content="#00C8D7" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icon-192.png" type="image/png" />
   <style>
     body {
       font-family: Arial, sans-serif;
-      margin: 20px;
-      background: #f0fdfd;
-      color: #333;
+      background-color: #f9f9f9;
+      margin: 0;
+      padding: 0;
+      text-align: center;
     }
 
     .logo {
-      display: block;
-      margin: 0 auto;
-      width: 150px;
+      width: 100px;
+      margin: 20px auto 10px;
     }
 
-    .descripcion {
-      text-align: center;
-      margin: 15px 0;
-      font-size: 16px;
-      color: #444;
+    h1 {
+      color: #00C8D7;
+      margin-bottom: 5px;
     }
 
-    .selector {
-      text-align: center;
-      margin: 20px 0;
+    p {
+      color: #666;
+      margin-bottom: 20px;
     }
 
-    .selector label {
-      margin-right: 20px;
-      font-size: 16px;
-    }
-
-    .contenedor {
-      max-width: 450px;
-      margin: 20px auto;
+    .container {
+      max-width: 400px;
+      margin: auto;
       background: white;
       padding: 20px;
       border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      display: none;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
     }
 
-    label {
-      display: block;
-      margin-top: 10px;
-      text-align: left;
-    }
-
-    input, select {
+    select, input, button {
       width: 100%;
-      padding: 8px;
-      margin-top: 5px;
-      border-radius: 4px;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
       border: 1px solid #ccc;
+      font-size: 16px;
     }
 
     button {
-      margin-top: 20px;
-      width: 100%;
-      padding: 10px;
-      background-color: #00bfa6;
+      background-color: #00C8D7;
       color: white;
       border: none;
-      border-radius: 4px;
-      font-size: 16px;
-      cursor: pointer;
+      font-weight: bold;
     }
 
-    #resultado, #resultadoDTF {
-      margin-top: 20px;
-      font-weight: bold;
-      text-align: center;
+    .resultado {
+      background: #e0f7fa;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 5px;
+    }
+
+    .hidden {
+      display: none;
     }
   </style>
 </head>
 <body>
+  <img src="logo-kavac-studio.png" alt="Logo Kavac Studio" class="logo" />
+  <h1>Kavac Studio</h1>
+  <p>Calculadora para impresión Foam y DTF</p>
 
-  <img src="logo-kavac-studio.png" alt="Logo Kavac Studio" class="logo">
-
-  <div class="descripcion">
-    Herramienta para cotizar productos personalizados: foam, impresión DTF, bordado y más.
-  </div>
-
-  <div class="selector">
-    <p><strong>¿Qué deseas calcular?</strong></p>
-    <label><input type="radio" name="tipo" value="foam" onchange="mostrarFormulario()"> Imagen de Foam</label>
-    <label><input type="radio" name="tipo" value="dtf" onchange="mostrarFormulario()"> Impresión DTF</label>
-  </div>
-
-  <!-- FOAM -->
-  <div class="contenedor" id="formularioFoam">
-    <h3>Calculadora de Imagen en Foam</h3>
-    <label for="alto">Alto (cm):</label>
-    <input type="number" id="alto" />
-
-    <label for="ancho">Ancho (cm):</label>
-    <input type="number" id="ancho" />
-
-    <button onclick="calcularFoam()">Calcular precio</button>
-
-    <div id="resultado"></div>
-  </div>
-
-  <!-- DTF -->
-  <div class="contenedor" id="formularioDTF">
-    <h3>Calculadora de Impresión DTF</h3>
-
-    <label for="cantidad">Cantidad de imágenes:</label>
-    <input type="number" id="cantidad" />
-
-    <label for="anchoImg">Ancho de imagen (cm):</label>
-    <input type="number" id="anchoImg" />
-
-    <label for="altoImg">Alto de imagen (cm):</label>
-    <input type="number" id="altoImg" />
-
-    <label for="anchoLienzo">Ancho del lienzo:</label>
-    <select id="anchoLienzo">
-      <option value="29">29 cm</option>
-      <option value="58">58 cm</option>
+  <div class="container">
+    <label for="tipo">¿Qué deseas calcular?</label>
+    <select id="tipo">
+      <option value="">Seleccionar...</option>
+      <option value="foam">Imagen de Foam</option>
+      <option value="dtf">Impresión DTF</option>
     </select>
 
-    <button onclick="calcularDTF()">Calcular largo y precio</button>
+    <!-- Formulario Foam -->
+    <div id="foamForm" class="hidden">
+      <label for="cantidadFoam">¿Cuántas imágenes deseas?</label>
+      <input type="number" id="cantidadFoam" placeholder="Ej: 10" min="1" />
+      <label for="tamañoFoam">Tamaño de imagen (cm)</label>
+      <input type="number" id="tamañoFoam" placeholder="Ej: 10" min="1" />
+      <button onclick="calcularFoam()">Calcular Foam</button>
+      <div id="resultadoFoam" class="resultado"></div>
+    </div>
 
-    <div id="resultadoDTF"></div>
+    <!-- Formulario DTF -->
+    <div id="dtfForm" class="hidden">
+      <label for="cantidadDtf">¿Cuántas imágenes?</label>
+      <input type="number" id="cantidadDtf" placeholder="Ej: 20" min="1" />
+      <label for="tamañoDtf">Tamaño de cada imagen (cm)</label>
+      <input type="number" id="tamañoDtf" placeholder="Ej: 10" min="1" />
+      <label for="anchoDtf">Ancho del lienzo</label>
+      <select id="anchoDtf">
+        <option value="29">29 cm</option>
+        <option value="58">58 cm</option>
+      </select>
+      <button onclick="calcularDTF()">Calcular DTF</button>
+      <div id="resultadoDtf" class="resultado"></div>
+    </div>
   </div>
 
   <script>
-    function mostrarFormulario() {
-      const tipo = document.querySelector('input[name="tipo"]:checked').value;
-      document.getElementById("formularioFoam").style.display = (tipo === "foam") ? "block" : "none";
-      document.getElementById("formularioDTF").style.display = (tipo === "dtf") ? "block" : "none";
-    }
+    const tipo = document.getElementById('tipo');
+    const foamForm = document.getElementById('foamForm');
+    const dtfForm = document.getElementById('dtfForm');
+
+    tipo.addEventListener('change', () => {
+      foamForm.classList.add('hidden');
+      dtfForm.classList.add('hidden');
+
+      if (tipo.value === 'foam') foamForm.classList.remove('hidden');
+      if (tipo.value === 'dtf') dtfForm.classList.remove('hidden');
+    });
 
     function calcularFoam() {
-      const alto = parseFloat(document.getElementById("alto").value) / 100;
-      const ancho = parseFloat(document.getElementById("ancho").value) / 100;
-      const area = alto * ancho;
-
-      const valorImpresion = 7500;
-      const valorLam = 8000;
-      const siliconBarras = 1500 / 3;
-      const transporte = 4000;
-
-      const precioImpresion = area * valorImpresion;
-      const porcentajeLam = area / (2.4 * 1.2);
-      const precioLam = porcentajeLam * valorLam;
-      const precioSilicon = siliconBarras;
-      const total = Math.ceil(precioImpresion + precioLam + precioSilicon + transporte);
-
-      document.getElementById("resultado").innerHTML = `Precio estimado: $${total.toLocaleString()}`;
+      const cantidad = parseInt(document.getElementById('cantidadFoam').value);
+      const tamaño = parseInt(document.getElementById('tamañoFoam').value);
+      const ancho = 29; // fijo
+      const porFila = Math.floor(ancho / tamaño);
+      const filas = Math.ceil(cantidad / porFila);
+      const largo = filas * tamaño;
+      document.getElementById('resultadoFoam').innerText = 
+        `Necesitarás un lienzo de aproximadamente ${largo} cm de largo para ${cantidad} imágenes de ${tamaño}x${tamaño} cm.`;
     }
 
     function calcularDTF() {
-      const cantidad = parseInt(document.getElementById("cantidad").value);
-      const anchoImg = parseFloat(document.getElementById("anchoImg").value);
-      const altoImg = parseFloat(document.getElementById("altoImg").value);
-      const anchoLienzo = parseFloat(document.getElementById("anchoLienzo").value);
+      const cantidad = parseInt(document.getElementById('cantidadDtf').value);
+      const tamaño = parseInt(document.getElementById('tamañoDtf').value);
+      const ancho = parseInt(document.getElementById('anchoDtf').value);
+      const porFila = Math.floor(ancho / tamaño);
+      const filas = Math.ceil(cantidad / porFila);
+      const largo = filas * tamaño;
+      const precioPorMetro = ancho === 29 ? 9990 : 18990;
+      const metros = Math.ceil(largo / 100);
+      const precioTotal = metros * precioPorMetro;
 
-      const imagenesPorFila = Math.floor(anchoLienzo / anchoImg);
-      const filas = Math.ceil(cantidad / imagenesPorFila);
-      const largoTotal = filas * altoImg;
+      document.getElementById('resultadoDtf').innerText = 
+        `Largo necesario: ${largo} cm\nPrecio estimado: $${precioTotal.toLocaleString('es-CL')}`;
+    }
 
-      let precioPorMetro = (anchoLienzo === 29) ? 9990 : 18990;
-      let precio = (largoTotal / 100) * precioPorMetro;
-
-      document.getElementById("resultadoDTF").innerHTML = `
-        Caben ${imagenesPorFila} imágenes por fila<br>
-        Se necesitan ${filas} filas<br>
-        Largo necesario: ${largoTotal} cm<br>
-        <strong>Precio estimado: $${Math.ceil(precio).toLocaleString()}</strong>
-      `;
+    // PWA Service Worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(() => console.log("Service Worker registrado"));
     }
   </script>
-
 </body>
 </html>
