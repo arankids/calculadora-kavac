@@ -6,8 +6,8 @@ self.addEventListener('install', function(event) {
         '/index.html',
         '/manifest.json',
         '/logo-kavac-studio.png',
-        '/icon-192.png',
-        '/icon-512.png'
+        '/kavac-icon-192.png',
+        '/kavac-icon-512.png'
       ]);
     })
   );
