@@ -15,157 +15,34 @@
       padding: 0;
       text-align: center;
     }
+
     .logo {
       width: 100px;
       margin: 20px auto 10px;
     }
+
     h1 {
       color: #00C8D7;
       margin-bottom: 5px;
     }
+
     p {
       color: #666;
       margin-bottom: 20px;
     }
+
     .container {
-      max-width: 400px;
+      max-width: 500px;
       margin: auto;
       background: white;
       padding: 20px;
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0,0,0,0.05);
     }
+
     select, input, button {
-      width: 100%;
       padding: 10px;
       margin: 10px 0;
       border-radius: 5px;
       border: 1px solid #ccc;
-      font-size: 16px;
-    }
-    button {
-      background-color: #00C8D7;
-      color: white;
-      border: none;
-      font-weight: bold;
-    }
-    .resultado, .desglose {
-      background: #e0f7fa;
-      padding: 10px;
-      margin-top: 10px;
-      border-radius: 5px;
-      white-space: pre-wrap;
-    }
-    .hidden {
-      display: none;
-    }
-  </style>
-</head>
-<body>
-  <img src="logo-kavac-studio.png" alt="Logo Kavac Studio" class="logo" />
-  <h1>Kavac Studio</h1>
-  <p>Calculadora para impresión Foam y DTF</p>
-
-  <div class="container">
-    <label for="tipo">¿Qué deseas calcular?</label>
-    <select id="tipo">
-      <option value="">Seleccionar...</option>
-      <option value="foam">Imagen de Foam</option>
-      <option value="dtf">Impresión DTF</option>
-    </select>
-
-    <!-- Formulario Foam -->
-    <div id="foamForm" class="hidden">
-      <label>Alto (cm)</label>
-      <input type="number" id="altoFoam" min="1" />
-      <label>Ancho (cm)</label>
-      <input type="number" id="anchoFoam" min="1" />
-      <label>Cantidad</label>
-      <input type="number" id="cantidadFoam" min="1" />
-      <button onclick="agregarFigura()">Agregar figura</button>
-      <ul id="listaFiguras"></ul>
-      <button onclick="calcularFoam()">Calcular Foam</button>
-      <div id="resultadoFoam" class="resultado"></div>
-      <button id="btnDesglose" class="hidden" onclick="toggleDesglose()">Ver desglose</button>
-      <div id="desgloseFoam" class="desglose hidden"></div>
-      <button onclick="resetFoam()">Nuevo cálculo</button>
-    </div>
-  </div>
-
-<script>
-  let figuras = [];
-
-  document.getElementById('tipo').addEventListener('change', e => {
-    document.getElementById('foamForm').classList.toggle('hidden', e.target.value !== 'foam');
-  });
-
-  function agregarFigura() {
-    const alto = parseFloat(document.getElementById('altoFoam').value);
-    const ancho = parseFloat(document.getElementById('anchoFoam').value);
-    const cantidad = parseInt(document.getElementById('cantidadFoam').value);
-
-    if (alto > 0 && ancho > 0 && cantidad > 0) {
-      figuras.push({ alto, ancho, cantidad });
-      const li = document.createElement('li');
-      li.textContent = `Figura ${figuras.length}: ${cantidad} de ${alto}x${ancho} cm`;
-      document.getElementById('listaFiguras').appendChild(li);
-      document.getElementById('altoFoam').value = '';
-      document.getElementById('anchoFoam').value = '';
-      document.getElementById('cantidadFoam').value = '';
-    } else {
-      alert('Completa todos los campos con valores válidos.');
-    }
-  }
-
-  function calcularFoam() {
-    if (figuras.length === 0) {
-      alert('Debes agregar al menos una figura.');
-      return;
-    }
-
-    const precioCarton = 12000;
-    const precioImpresion = 8000;
-    const ganancia = 0.5;
-    const areaLamina = 2.4 * 1.2;
-    const precioM2Carton = precioCarton / areaLamina;
-
-    let totalArea = 0;
-    let desgloseTexto = '';
-    let totalFiguras = 0;
-
-    figuras.forEach((fig, i) => {
-      const area = (fig.alto / 100) * (fig.ancho / 100);
-      const areaTotalFigura = area * fig.cantidad;
-      totalArea += areaTotalFigura;
-      totalFiguras += fig.cantidad;
-      desgloseTexto += `Figura ${i+1}: ${fig.cantidad} de ${fig.alto}x${fig.ancho} cm = ${areaTotalFigura.toFixed(2)} m²\n`;
-    });
-
-    const costoBase = totalArea * (precioM2Carton + precioImpresion);
-    const utilidad = costoBase * ganancia;
-    const precioFinal = costoBase + utilidad;
-    const precioUnitario = precioFinal / totalFiguras;
-
-    document.getElementById('resultadoFoam').innerText = `Precio total: $${Math.round(precioFinal).toLocaleString('es-CL')}\nPrecio por figura: $${Math.round(precioUnitario).toLocaleString('es-CL')}`;
-    document.getElementById('desgloseFoam').innerText = `🔸 Área total: ${totalArea.toFixed(2)} m²\n🔸 Costo base: $${Math.round(costoBase).toLocaleString('es-CL')}\n🔸 Ganancia (50%): $${Math.round(utilidad).toLocaleString('es-CL')}\n\n${desgloseTexto}`;
-    document.getElementById('btnDesglose').classList.remove('hidden');
-  }
-
-  function toggleDesglose() {
-    document.getElementById('desgloseFoam').classList.toggle('hidden');
-  }
-
-  function resetFoam() {
-    figuras = [];
-    document.getElementById('altoFoam').value = '';
-    document.getElementById('anchoFoam').value = '';
-    document.getElementById('cantidadFoam').value = '';
-    document.getElementById('listaFiguras').innerHTML = '';
-    document.getElementById('resultadoFoam').innerHTML = '';
-    document.getElementById('desgloseFoam').innerHTML = '';
-    document.getElementById('btnDesglose').classList.add('hidden');
-    document.getElementById('desgloseFoam').classList.add('hidden');
-  }
-</script>
-</body>
-</html>
+      font-size: 1
