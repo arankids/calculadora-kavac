@@ -28,7 +28,7 @@
       margin-bottom: 20px;
     }
     .container {
-      max-width: 500px;
+      max-width: 600px;
       margin: auto;
       background: white;
       padding: 20px;
@@ -36,13 +36,15 @@
       box-shadow: 0 0 10px rgba(0,0,0,0.05);
     }
     select, input {
-      width: 30%;
       padding: 10px;
-      margin: 5px 1%;
+      margin: 5px;
       border-radius: 5px;
       border: 1px solid #ccc;
       font-size: 14px;
       box-sizing: border-box;
+    }
+    input[type="number"] {
+      width: 80px;
     }
     button {
       background-color: #00C8D7;
@@ -54,13 +56,6 @@
       border-radius: 5px;
       font-weight: bold;
       cursor: pointer;
-    }
-    .figura-row {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 10px;
-      margin-top: 10px;
     }
     .remove-btn {
       background-color: #ff5f5f;
@@ -84,17 +79,17 @@
 
   <div class="container">
     <label>¿Qué deseas calcular?</label>
-    <select id="tipo">
+    <select id="tipo" onchange="cambiarTipo()">
       <option value="foam">Imagen de Foam</option>
       <option value="dtf">Impresión DTF</option>
     </select>
 
-    <!-- FOAM -->
-    <div id="foamSection">
+    <!-- FORM FOAM -->
+    <div id="formFoam">
       <div>
-        <input id="alto" type="number" placeholder="Alto" />
-        <input id="ancho" type="number" placeholder="Ancho" />
-        <input id="cantidad" type="number" placeholder="Cant." />
+        <input id="alto" type="number" placeholder="Alto (cm)" />
+        <input id="ancho" type="number" placeholder="Ancho (cm)" />
+        <input id="cantidad" type="number" placeholder="Cantidad" />
       </div>
       <div id="figurasContainer"></div>
       <button onclick="calcularFoam()">Calcular Foam</button>
@@ -104,32 +99,24 @@
       <div id="desgloseFoam" class="desglose hidden"></div>
     </div>
 
-    <!-- DTF -->
-    <div id="dtfSection" class="hidden">
-      <input id="cantidadDtf" type="number" placeholder="Cantidad" />
-      <input id="tamañoDtf" type="number" placeholder="Tamaño (cm)" />
-      <select id="anchoDtf">
+    <!-- FORM DTF -->
+    <div id="formDTF" class="hidden">
+      <input id="dtfCantidad" type="number" placeholder="Cantidad" />
+      <input id="dtfAlto" type="number" placeholder="Alto (cm)" />
+      <input id="dtfAncho" type="number" placeholder="Ancho (cm)" />
+      <select id="dtfTamano">
         <option value="29">29 cm</option>
         <option value="58">58 cm</option>
       </select>
       <button onclick="calcularDTF()">Calcular DTF</button>
       <button onclick="resetDTF()">Nuevo cálculo</button>
-      <div id="resultadoDtf" class="resultado hidden"></div>
+      <div id="resultadoDTF" class="resultado hidden"></div>
     </div>
   </div>
 
   <script>
-    const tipo = document.getElementById('tipo');
-    const foamSection = document.getElementById('foamSection');
-    const dtfSection = document.getElementById('dtfSection');
-    tipo.addEventListener('change', () => {
-      foamSection.classList.add('hidden');
-      dtfSection.classList.add('hidden');
-      if (tipo.value === 'foam') foamSection.classList.remove('hidden');
-      if (tipo.value === 'dtf') dtfSection.classList.remove('hidden');
-    });
-
     let figuras = [];
+
     document.querySelectorAll('#alto, #ancho, #cantidad').forEach(input => {
       input.addEventListener('change', () => {
         const alto = parseFloat(document.getElementById('alto').value);
@@ -146,18 +133,22 @@
       });
     });
 
+    function cambiarTipo() {
+      const tipo = document.getElementById('tipo').value;
+      document.getElementById('formFoam').classList.toggle('hidden', tipo !== 'foam');
+      document.getElementById('formDTF').classList.toggle('hidden', tipo !== 'dtf');
+    }
+
     function renderFiguras() {
       const container = document.getElementById('figurasContainer');
       container.innerHTML = '';
       figuras.forEach((fig, index) => {
         const div = document.createElement('div');
-        div.className = 'figura-row';
         div.innerHTML = `
           <input value="${fig.alto}" disabled />
           <input value="${fig.ancho}" disabled />
           <input value="${fig.cantidad}" disabled />
-          <button class="remove-btn" onclick="eliminarFigura(${index})">&#10060;</button>
-        `;
+          <button class="remove-btn" onclick="eliminarFigura(${index})">&#10060;</button>`;
         container.appendChild(div);
       });
     }
@@ -172,7 +163,6 @@
         alert("Debes agregar al menos una figura.");
         return;
       }
-
       const precioCartonPluma = 12000;
       const precioImpresionM2 = 11500;
       const ganancia = 0.6;
@@ -196,6 +186,7 @@
 
       document.getElementById('resultadoFoam').innerText = `🧾 Total estimado: $${Math.round(precioFinal).toLocaleString('es-CL')}`;
       document.getElementById('resultadoFoam').classList.remove('hidden');
+      document.getElementById('toggleDesgloseBtn').classList.remove('hidden');
 
       desgloseHTML += `📏 Área total: ${areaTotal.toFixed(2)} m²<br>`;
       desgloseHTML += `💰 Costo base: $${Math.round(costoBase).toLocaleString('es-CL')}<br>`;
@@ -203,19 +194,13 @@
       desgloseHTML += `💵 Precio final: $${Math.round(precioFinal).toLocaleString('es-CL')}`;
 
       document.getElementById('desgloseFoam').innerHTML = desgloseHTML;
-      document.getElementById('toggleDesgloseBtn').classList.remove('hidden');
     }
 
     function toggleDesglose() {
       const desglose = document.getElementById('desgloseFoam');
       const btn = document.getElementById('toggleDesgloseBtn');
-      if (desglose.classList.contains('hidden')) {
-        desglose.classList.remove('hidden');
-        btn.innerText = "Ocultar desglose";
-      } else {
-        desglose.classList.add('hidden');
-        btn.innerText = "Ver desglose";
-      }
+      desglose.classList.toggle('hidden');
+      btn.innerText = desglose.classList.contains('hidden') ? "Ver desglose" : "Ocultar desglose";
     }
 
     function resetFoam() {
@@ -231,33 +216,37 @@
     }
 
     function calcularDTF() {
-      const cantidad = parseInt(document.getElementById('cantidadDtf').value);
-      const tamaño = parseInt(document.getElementById('tamañoDtf').value);
-      const ancho = parseInt(document.getElementById('anchoDtf').value);
+      const cantidad = parseInt(document.getElementById('dtfCantidad').value);
+      const alto = parseFloat(document.getElementById('dtfAlto').value);
+      const ancho = parseFloat(document.getElementById('dtfAncho').value);
+      const tamano = parseInt(document.getElementById('dtfTamano').value);
 
-      if (!cantidad || !tamaño || cantidad < 1 || tamaño < 1) {
-        document.getElementById('resultadoDtf').innerText = "Por favor, ingresa valores válidos.";
-        document.getElementById('resultadoDtf').classList.remove('hidden');
+      if (!cantidad || !alto || !ancho) {
+        alert("Completa todos los campos");
         return;
       }
 
-      const porFila = Math.floor(ancho / tamaño);
-      const filas = Math.ceil(cantidad / porFila);
-      const largo = filas * tamaño;
-      const precioPorMetro = ancho === 29 ? 9990 : 18990;
-      const metros = Math.ceil(largo / 100);
-      const precioTotal = metros * precioPorMetro;
+      const imagenAncho = ancho;
+      const imagenAlto = alto;
 
-      document.getElementById('resultadoDtf').innerText =
-        `📐 Largo necesario: ${largo} cm\n💵 Precio estimado: $${precioTotal.toLocaleString('es-CL')}`;
-      document.getElementById('resultadoDtf').classList.remove('hidden');
+      const imagenesPorFila = Math.floor(tamano / imagenAncho);
+      const filasNecesarias = Math.ceil(cantidad / imagenesPorFila);
+      const largoNecesario = filasNecesarias * imagenAlto;
+
+      const precioPorMetro = tamano === 29 ? 9990 : 18990;
+      const metrosLineales = largoNecesario / 100;
+      const total = metrosLineales * precioPorMetro;
+
+      document.getElementById('resultadoDTF').innerText = `🖼️ Imágenes por fila: ${imagenesPorFila}\n📏 Largo necesario: ${largoNecesario} cm\n💵 Total: $${Math.round(total).toLocaleString('es-CL')}`;
+      document.getElementById('resultadoDTF').classList.remove('hidden');
     }
 
     function resetDTF() {
-      document.getElementById('cantidadDtf').value = '';
-      document.getElementById('tamañoDtf').value = '';
-      document.getElementById('resultadoDtf').innerHTML = '';
-      document.getElementById('resultadoDtf').classList.add('hidden');
+      document.getElementById('dtfCantidad').value = '';
+      document.getElementById('dtfAlto').value = '';
+      document.getElementById('dtfAncho').value = '';
+      document.getElementById('resultadoDTF').innerHTML = '';
+      document.getElementById('resultadoDTF').classList.add('hidden');
     }
   </script>
 </body>
