@@ -81,26 +81,91 @@
       <label>Ancho (cm)</label>
       <input type="number" id="anchoFoam" min="1" />
       <label>Cantidad</label>
-      <input type="number" id="cantidad
+      <input type="number" id="cantidadFoam" min="1" />
+      <button onclick="agregarFigura()">Agregar figura</button>
+      <ul id="listaFiguras"></ul>
+      <button onclick="calcularFoam()">Calcular Foam</button>
+      <div id="resultadoFoam" class="resultado"></div>
+      <button id="btnDesglose" class="hidden" onclick="toggleDesglose()">Ver desglose</button>
+      <div id="desgloseFoam" class="desglose hidden"></div>
+      <button onclick="resetFoam()">Nuevo cálculo</button>
+    </div>
+  </div>
 
-Perfecto, gracias por la imagen. Puedo confirmar que el desglose **está funcionando correctamente** en tu calculadora:
+<script>
+  let figuras = [];
 
-### ✔ Resultado correcto:
-Con una figura de **40x20 cm**:
-- Área: 0.08 m² (correcto: 0.4 x 0.2 = 0.08 m²)
-- Costo base: $973 (cartón + impresión por m²)
-- Ganancia del 50%: $487
-- **Precio final total**: $1.460
-- **Precio por figura**: $1.460 (como solo es 1 figura)
+  document.getElementById('tipo').addEventListener('change', e => {
+    document.getElementById('foamForm').classList.toggle('hidden', e.target.value !== 'foam');
+  });
 
----
+  function agregarFigura() {
+    const alto = parseFloat(document.getElementById('altoFoam').value);
+    const ancho = parseFloat(document.getElementById('anchoFoam').value);
+    const cantidad = parseInt(document.getElementById('cantidadFoam').value);
 
-### ✅ Próximos pasos sugeridos:
-1. **Botón para ocultar/mostrar desglose**: Si quieres que el desglose aparezca solo al presionar un botón, puedo darte el bloque actualizado con ese cambio.
-2. ¿Quieres permitir **múltiples figuras de distintos tamaños** como antes? (si aún no lo tienes funcionando).
+    if (alto > 0 && ancho > 0 && cantidad > 0) {
+      figuras.push({ alto, ancho, cantidad });
+      const li = document.createElement('li');
+      li.textContent = `Figura ${figuras.length}: ${cantidad} de ${alto}x${ancho} cm`;
+      document.getElementById('listaFiguras').appendChild(li);
+      document.getElementById('altoFoam').value = '';
+      document.getElementById('anchoFoam').value = '';
+      document.getElementById('cantidadFoam').value = '';
+    } else {
+      alert('Completa todos los campos con valores válidos.');
+    }
+  }
 
-¿Quieres que te envíe ya el `index.html` con:
-- 🔘 Botón para mostrar/ocultar el desglose
-- 📦 Soporte para múltiples figuras con diferentes tamaños
+  function calcularFoam() {
+    if (figuras.length === 0) {
+      alert('Debes agregar al menos una figura.');
+      return;
+    }
 
-?
+    const precioCarton = 12000;
+    const precioImpresion = 8000;
+    const ganancia = 0.5;
+    const areaLamina = 2.4 * 1.2;
+    const precioM2Carton = precioCarton / areaLamina;
+
+    let totalArea = 0;
+    let desgloseTexto = '';
+    let totalFiguras = 0;
+
+    figuras.forEach((fig, i) => {
+      const area = (fig.alto / 100) * (fig.ancho / 100);
+      const areaTotalFigura = area * fig.cantidad;
+      totalArea += areaTotalFigura;
+      totalFiguras += fig.cantidad;
+      desgloseTexto += `Figura ${i+1}: ${fig.cantidad} de ${fig.alto}x${fig.ancho} cm = ${areaTotalFigura.toFixed(2)} m²\n`;
+    });
+
+    const costoBase = totalArea * (precioM2Carton + precioImpresion);
+    const utilidad = costoBase * ganancia;
+    const precioFinal = costoBase + utilidad;
+    const precioUnitario = precioFinal / totalFiguras;
+
+    document.getElementById('resultadoFoam').innerText = `Precio total: $${Math.round(precioFinal).toLocaleString('es-CL')}\nPrecio por figura: $${Math.round(precioUnitario).toLocaleString('es-CL')}`;
+    document.getElementById('desgloseFoam').innerText = `🔸 Área total: ${totalArea.toFixed(2)} m²\n🔸 Costo base: $${Math.round(costoBase).toLocaleString('es-CL')}\n🔸 Ganancia (50%): $${Math.round(utilidad).toLocaleString('es-CL')}\n\n${desgloseTexto}`;
+    document.getElementById('btnDesglose').classList.remove('hidden');
+  }
+
+  function toggleDesglose() {
+    document.getElementById('desgloseFoam').classList.toggle('hidden');
+  }
+
+  function resetFoam() {
+    figuras = [];
+    document.getElementById('altoFoam').value = '';
+    document.getElementById('anchoFoam').value = '';
+    document.getElementById('cantidadFoam').value = '';
+    document.getElementById('listaFiguras').innerHTML = '';
+    document.getElementById('resultadoFoam').innerHTML = '';
+    document.getElementById('desgloseFoam').innerHTML = '';
+    document.getElementById('btnDesglose').classList.add('hidden');
+    document.getElementById('desgloseFoam').classList.add('hidden');
+  }
+</script>
+</body>
+</html>
