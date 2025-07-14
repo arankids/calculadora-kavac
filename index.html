@@ -54,6 +54,7 @@
       color: white;
       border: none;
       font-weight: bold;
+      cursor: pointer;
     }
 
     .resultado {
@@ -66,6 +67,12 @@
 
     .hidden {
       display: none;
+    }
+
+    #listaFiguras {
+      text-align: left;
+      font-size: 14px;
+      color: #333;
     }
   </style>
 </head>
@@ -84,12 +91,18 @@
 
     <!-- Formulario Foam -->
     <div id="foamForm" class="hidden">
-      <label for="cantidadFoam">¿Cuántas figuras?</label>
-      <input type="number" id="cantidadFoam" min="1" />
-      <label for="altoFoam">Alto de cada figura (cm)</label>
+      <label for="altoFoam">Alto (cm)</label>
       <input type="number" id="altoFoam" min="1" />
-      <label for="anchoFoam">Ancho de cada figura (cm)</label>
+
+      <label for="anchoFoam">Ancho (cm)</label>
       <input type="number" id="anchoFoam" min="1" />
+
+      <label for="cantidadFoam">Cantidad</label>
+      <input type="number" id="cantidadFoam" min="1" />
+
+      <button onclick="agregarFigura()">Agregar figura</button>
+      <div id="listaFiguras"></div>
+
       <button onclick="calcularFoam()">Calcular Foam</button>
       <div id="resultadoFoam" class="resultado"></div>
     </div>
@@ -111,6 +124,7 @@
   </div>
 
   <script>
+    // Control de formularios
     const tipo = document.getElementById('tipo');
     const foamForm = document.getElementById('foamForm');
     const dtfForm = document.getElementById('dtfForm');
@@ -118,56 +132,101 @@
     tipo.addEventListener('change', () => {
       foamForm.classList.add('hidden');
       dtfForm.classList.add('hidden');
-
       if (tipo.value === 'foam') foamForm.classList.remove('hidden');
       if (tipo.value === 'dtf') dtfForm.classList.remove('hidden');
     });
 
-    function calcularFoam() {
-      const cantidad = parseInt(document.getElementById('cantidadFoam').value);
-      const alto = parseInt(document.getElementById('altoFoam').value);
-      const ancho = parseInt(document.getElementById('anchoFoam').value);
-      const resultadoDiv = document.getElementById('resultadoFoam');
+    // =================== FOAM ======================
+    let foamFiguras = [];
 
-      if (!cantidad || !alto || !ancho || cantidad < 1 || alto < 1 || ancho < 1) {
-        resultadoDiv.innerHTML = "<strong>Por favor, ingresa valores válidos.</strong>";
+    function agregarFigura() {
+      const alto = parseFloat(document.getElementById('altoFoam').value);
+      const ancho = parseFloat(document.getElementById('anchoFoam').value);
+      const cantidad = parseInt(document.getElementById('cantidadFoam').value);
+
+      if (!alto || !ancho || !cantidad || alto <= 0 || ancho <= 0 || cantidad <= 0) {
+        alert('Por favor, ingresa valores válidos para cada figura.');
         return;
       }
 
-      // Valores fijos
+      foamFiguras.push({ alto, ancho, cantidad });
+
+      document.getElementById('altoFoam').value = '';
+      document.getElementById('anchoFoam').value = '';
+      document.getElementById('cantidadFoam').value = '';
+
+      mostrarListaFiguras();
+    }
+
+    function mostrarListaFiguras() {
+      const lista = foamFiguras.map((figura, i) =>
+        `🔹 Figura ${i + 1}: ${figura.cantidad} unidad(es) de ${figura.ancho}x${figura.alto} cm`
+      ).join('<br>');
+      document.getElementById('listaFiguras').innerHTML = lista;
+    }
+
+    function calcularFoam() {
+      if (foamFiguras.length === 0) {
+        alert("Debes agregar al menos una figura.");
+        return;
+      }
+
       const precioCartonPluma = 12000;
-      const areaLamina = 2.4 * 1.2;
+      const areaLamina = 2.4 * 1.2; // 2.88 m²
       const precioCartonPorM2 = precioCartonPluma / areaLamina;
 
       const precioImpresionPorM2 = 8000;
       const ganancia = 0.5;
 
-      // Área por figura
-      const areaPorFigura = (alto / 100) * (ancho / 100);
-      const areaTotal = areaPorFigura * cantidad;
+      let totalArea = 0;
+      let desglose = '';
+      let costoTotal = 0;
 
-      const costoMateriales = areaTotal * (precioCartonPorM2 + precioImpresionPorM2);
-      const precioFinal = costoMateriales * (1 + ganancia);
-      const precioPorFigura = precioFinal / cantidad;
+      foamFiguras.forEach((figura, i) => {
+        const area = (figura.ancho / 100) * (figura.alto / 100);
+        const areaTotalFigura = area * figura.cantidad;
+        const costoBase = areaTotalFigura * (precioCartonPorM2 + precioImpresionPorM2);
+        const gananciaFigura = costoBase * ganancia;
+        const precioFinal = costoBase + gananciaFigura;
+        const precioUnitario = precioFinal / figura.cantidad;
 
-      resultadoDiv.innerHTML = `
-<strong>Desglose del cálculo:</strong><br>
-🔹 Área total usada: ${areaTotal.toFixed(2)} m²<br>
-🔹 Costo base (cartón + impresión): $${Math.round(costoMateriales).toLocaleString('es-CL')}<br>
-🔹 Ganancia (50%): $${Math.round(costoMateriales * ganancia).toLocaleString('es-CL')}<br>
-<strong>🔸 Precio final: $${Math.round(precioFinal).toLocaleString('es-CL')}</strong><br>
-🔹 Precio por figura: $${Math.round(precioPorFigura).toLocaleString('es-CL')}<br><br>
-<button onclick="resetFoam()">Nuevo cálculo</button>
-      `;
+        totalArea += areaTotalFigura;
+        costoTotal += precioFinal;
+
+        desglose += `🔹 Figura ${i + 1} - ${figura.cantidad} unidad(es) de ${figura.ancho}x${figura.alto} cm\n`;
+        desglose += `   - Área: ${areaTotalFigura.toFixed(2)} m²\n`;
+        desglose += `   - Costo base: $${Math.round(costoBase).toLocaleString('es-CL')}\n`;
+        desglose += `   - Ganancia (50%): $${Math.round(gananciaFigura).toLocaleString('es-CL')}\n`;
+        desglose += `   - Precio total: $${Math.round(precioFinal).toLocaleString('es-CL')}\n`;
+        desglose += `   - Precio unitario: $${Math.round(precioUnitario).toLocaleString('es-CL')}\n\n`;
+      });
+
+      const resultado = `
+<strong>🔸 Total figuras: ${foamFiguras.reduce((acc, f) => acc + f.cantidad, 0)}</strong><br>
+<strong>🔸 Área total: ${totalArea.toFixed(2)} m²</strong><br>
+<strong>🔸 Precio total: $${Math.round(costoTotal).toLocaleString('es-CL')}</strong><br><br>
+<button onclick="mostrarDesgloseFoam()">Ver desglose</button>
+<button onclick="resetFoam()" style="margin-left:10px;">Nuevo cálculo</button>
+<div id="desgloseFoam" class="hidden" style="text-align:left; margin-top:10px; white-space:pre-wrap;">${desglose}</div>
+`;
+
+      document.getElementById('resultadoFoam').innerHTML = resultado;
+    }
+
+    function mostrarDesgloseFoam() {
+      document.getElementById('desgloseFoam').classList.remove('hidden');
     }
 
     function resetFoam() {
-      document.getElementById('cantidadFoam').value = '';
+      foamFiguras = [];
       document.getElementById('altoFoam').value = '';
       document.getElementById('anchoFoam').value = '';
+      document.getElementById('cantidadFoam').value = '';
+      document.getElementById('listaFiguras').innerHTML = '';
       document.getElementById('resultadoFoam').innerHTML = '';
     }
 
+    // =================== DTF ======================
     function calcularDTF() {
       const cantidad = parseInt(document.getElementById('cantidadDtf').value);
       const tamaño = parseInt(document.getElementById('tamañoDtf').value);
@@ -183,6 +242,7 @@
         `Largo necesario: ${largo} cm\nPrecio estimado: $${precioTotal.toLocaleString('es-CL')}`;
     }
 
+    // PWA
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('service-worker.js')
         .then(() => console.log("Service Worker registrado"));
