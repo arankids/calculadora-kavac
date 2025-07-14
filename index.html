@@ -15,22 +15,18 @@
       padding: 0;
       text-align: center;
     }
-
     .logo {
       width: 100px;
       margin: 20px auto 10px;
     }
-
     h1 {
       color: #00C8D7;
       margin-bottom: 5px;
     }
-
     p {
       color: #666;
       margin-bottom: 20px;
     }
-
     .container {
       max-width: 400px;
       margin: auto;
@@ -39,7 +35,6 @@
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0,0,0,0.05);
     }
-
     select, input, button {
       width: 100%;
       padding: 10px;
@@ -48,31 +43,21 @@
       border: 1px solid #ccc;
       font-size: 16px;
     }
-
     button {
       background-color: #00C8D7;
       color: white;
       border: none;
       font-weight: bold;
-      cursor: pointer;
     }
-
-    .resultado {
+    .resultado, .desglose {
       background: #e0f7fa;
       padding: 10px;
       margin-top: 10px;
       border-radius: 5px;
       white-space: pre-wrap;
     }
-
     .hidden {
       display: none;
-    }
-
-    #listaFiguras {
-      text-align: left;
-      font-size: 14px;
-      color: #333;
     }
   </style>
 </head>
@@ -91,162 +76,31 @@
 
     <!-- Formulario Foam -->
     <div id="foamForm" class="hidden">
-      <label for="altoFoam">Alto (cm)</label>
+      <label>Alto (cm)</label>
       <input type="number" id="altoFoam" min="1" />
-
-      <label for="anchoFoam">Ancho (cm)</label>
+      <label>Ancho (cm)</label>
       <input type="number" id="anchoFoam" min="1" />
+      <label>Cantidad</label>
+      <input type="number" id="cantidad
 
-      <label for="cantidadFoam">Cantidad</label>
-      <input type="number" id="cantidadFoam" min="1" />
+Perfecto, gracias por la imagen. Puedo confirmar que el desglose **está funcionando correctamente** en tu calculadora:
 
-      <button onclick="agregarFigura()">Agregar figura</button>
-      <div id="listaFiguras"></div>
+### ✔ Resultado correcto:
+Con una figura de **40x20 cm**:
+- Área: 0.08 m² (correcto: 0.4 x 0.2 = 0.08 m²)
+- Costo base: $973 (cartón + impresión por m²)
+- Ganancia del 50%: $487
+- **Precio final total**: $1.460
+- **Precio por figura**: $1.460 (como solo es 1 figura)
 
-      <button onclick="calcularFoam()">Calcular Foam</button>
-      <div id="resultadoFoam" class="resultado"></div>
-    </div>
+---
 
-    <!-- Formulario DTF -->
-    <div id="dtfForm" class="hidden">
-      <label for="cantidadDtf">¿Cuántas imágenes?</label>
-      <input type="number" id="cantidadDtf" min="1" />
-      <label for="tamañoDtf">Tamaño de cada imagen (cm)</label>
-      <input type="number" id="tamañoDtf" min="1" />
-      <label for="anchoDtf">Ancho del lienzo</label>
-      <select id="anchoDtf">
-        <option value="29">29 cm</option>
-        <option value="58">58 cm</option>
-      </select>
-      <button onclick="calcularDTF()">Calcular DTF</button>
-      <div id="resultadoDtf" class="resultado"></div>
-    </div>
-  </div>
+### ✅ Próximos pasos sugeridos:
+1. **Botón para ocultar/mostrar desglose**: Si quieres que el desglose aparezca solo al presionar un botón, puedo darte el bloque actualizado con ese cambio.
+2. ¿Quieres permitir **múltiples figuras de distintos tamaños** como antes? (si aún no lo tienes funcionando).
 
-  <script>
-    // Control de formularios
-    const tipo = document.getElementById('tipo');
-    const foamForm = document.getElementById('foamForm');
-    const dtfForm = document.getElementById('dtfForm');
+¿Quieres que te envíe ya el `index.html` con:
+- 🔘 Botón para mostrar/ocultar el desglose
+- 📦 Soporte para múltiples figuras con diferentes tamaños
 
-    tipo.addEventListener('change', () => {
-      foamForm.classList.add('hidden');
-      dtfForm.classList.add('hidden');
-      if (tipo.value === 'foam') foamForm.classList.remove('hidden');
-      if (tipo.value === 'dtf') dtfForm.classList.remove('hidden');
-    });
-
-    // =================== FOAM ======================
-    let foamFiguras = [];
-
-    function agregarFigura() {
-      const alto = parseFloat(document.getElementById('altoFoam').value);
-      const ancho = parseFloat(document.getElementById('anchoFoam').value);
-      const cantidad = parseInt(document.getElementById('cantidadFoam').value);
-
-      if (!alto || !ancho || !cantidad || alto <= 0 || ancho <= 0 || cantidad <= 0) {
-        alert('Por favor, ingresa valores válidos para cada figura.');
-        return;
-      }
-
-      foamFiguras.push({ alto, ancho, cantidad });
-
-      document.getElementById('altoFoam').value = '';
-      document.getElementById('anchoFoam').value = '';
-      document.getElementById('cantidadFoam').value = '';
-
-      mostrarListaFiguras();
-    }
-
-    function mostrarListaFiguras() {
-      const lista = foamFiguras.map((figura, i) =>
-        `🔹 Figura ${i + 1}: ${figura.cantidad} unidad(es) de ${figura.ancho}x${figura.alto} cm`
-      ).join('<br>');
-      document.getElementById('listaFiguras').innerHTML = lista;
-    }
-
-    function calcularFoam() {
-      if (foamFiguras.length === 0) {
-        alert("Debes agregar al menos una figura.");
-        return;
-      }
-
-      const precioCartonPluma = 12000;
-      const areaLamina = 2.4 * 1.2; // 2.88 m²
-      const precioCartonPorM2 = precioCartonPluma / areaLamina;
-
-      const precioImpresionPorM2 = 8000;
-      const ganancia = 0.5;
-
-      let totalArea = 0;
-      let desglose = '';
-      let costoTotal = 0;
-
-      foamFiguras.forEach((figura, i) => {
-        const area = (figura.ancho / 100) * (figura.alto / 100);
-        const areaTotalFigura = area * figura.cantidad;
-        const costoBase = areaTotalFigura * (precioCartonPorM2 + precioImpresionPorM2);
-        const gananciaFigura = costoBase * ganancia;
-        const precioFinal = costoBase + gananciaFigura;
-        const precioUnitario = precioFinal / figura.cantidad;
-
-        totalArea += areaTotalFigura;
-        costoTotal += precioFinal;
-
-        desglose += `🔹 Figura ${i + 1} - ${figura.cantidad} unidad(es) de ${figura.ancho}x${figura.alto} cm\n`;
-        desglose += `   - Área: ${areaTotalFigura.toFixed(2)} m²\n`;
-        desglose += `   - Costo base: $${Math.round(costoBase).toLocaleString('es-CL')}\n`;
-        desglose += `   - Ganancia (50%): $${Math.round(gananciaFigura).toLocaleString('es-CL')}\n`;
-        desglose += `   - Precio total: $${Math.round(precioFinal).toLocaleString('es-CL')}\n`;
-        desglose += `   - Precio unitario: $${Math.round(precioUnitario).toLocaleString('es-CL')}\n\n`;
-      });
-
-      const resultado = `
-<strong>🔸 Total figuras: ${foamFiguras.reduce((acc, f) => acc + f.cantidad, 0)}</strong><br>
-<strong>🔸 Área total: ${totalArea.toFixed(2)} m²</strong><br>
-<strong>🔸 Precio total: $${Math.round(costoTotal).toLocaleString('es-CL')}</strong><br><br>
-<button onclick="mostrarDesgloseFoam()">Ver desglose</button>
-<button onclick="resetFoam()" style="margin-left:10px;">Nuevo cálculo</button>
-<div id="desgloseFoam" class="hidden" style="text-align:left; margin-top:10px; white-space:pre-wrap;">${desglose}</div>
-`;
-
-      document.getElementById('resultadoFoam').innerHTML = resultado;
-    }
-
-    function mostrarDesgloseFoam() {
-      document.getElementById('desgloseFoam').classList.remove('hidden');
-    }
-
-    function resetFoam() {
-      foamFiguras = [];
-      document.getElementById('altoFoam').value = '';
-      document.getElementById('anchoFoam').value = '';
-      document.getElementById('cantidadFoam').value = '';
-      document.getElementById('listaFiguras').innerHTML = '';
-      document.getElementById('resultadoFoam').innerHTML = '';
-    }
-
-    // =================== DTF ======================
-    function calcularDTF() {
-      const cantidad = parseInt(document.getElementById('cantidadDtf').value);
-      const tamaño = parseInt(document.getElementById('tamañoDtf').value);
-      const ancho = parseInt(document.getElementById('anchoDtf').value);
-      const porFila = Math.floor(ancho / tamaño);
-      const filas = Math.ceil(cantidad / porFila);
-      const largo = filas * tamaño;
-      const precioPorMetro = ancho === 29 ? 9990 : 18990;
-      const metros = Math.ceil(largo / 100);
-      const precioTotal = metros * precioPorMetro;
-
-      document.getElementById('resultadoDtf').innerText = 
-        `Largo necesario: ${largo} cm\nPrecio estimado: $${precioTotal.toLocaleString('es-CL')}`;
-    }
-
-    // PWA
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js')
-        .then(() => console.log("Service Worker registrado"));
-    }
-  </script>
-</body>
-</html>
+?
