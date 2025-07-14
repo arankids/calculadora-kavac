@@ -3,92 +3,187 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Kavac Studio</title>
+  <title>Calculadora Kavac Studio</title>
+  <meta name="theme-color" content="#00C8D7" />
   <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="style.css" />
-  <link rel="icon" href="logo.png" type="image/png">
+  <link rel="icon" href="kavac-icon-192.png" type="image/png" />
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f9f9f9;
+      background-color: #f9f9f9;
       margin: 0;
       padding: 0;
       text-align: center;
     }
-    .container {
-      max-width: 600px;
-      margin: auto;
-      background: white;
-      padding: 2rem;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+
+    .logo {
+      width: 100px;
+      margin: 20px auto 10px;
     }
+
     h1 {
-      color: #00b7bd;
-    }
-    select, input {
-      padding: 10px;
-      margin: 5px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      width: calc(33% - 10px);
-    }
-    button {
-      background-color: #00b7bd;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      margin: 5px;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    .output {
-      background: #e3f9f9;
-      padding: 1rem;
-      margin-top: 1rem;
-      border-radius: 10px;
-    }
-    .figura-input {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-    .figura-input input {
-      width: 80px;
-    }
-    .figura-item {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 5px;
+      color: #00C8D7;
       margin-bottom: 5px;
     }
-    .figura-item button {
-      background-color: #ff5e5e;
+
+    p {
+      color: #666;
+      margin-bottom: 20px;
+    }
+
+    .container {
+      max-width: 400px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+
+    select, input, button {
+      width: 100%;
+      padding: 8px;
+      margin: 6px 0;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 15px;
+    }
+
+    button {
+      background-color: #00C8D7;
+      color: white;
+      border: none;
+      font-weight: bold;
+    }
+
+    .resultado {
+      background: #e0f7fa;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 5px;
+      white-space: pre-wrap;
+    }
+
+    .hidden {
+      display: none;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <img src="logo.png" alt="Kavac Studio" style="max-height: 50px;" />
-    <h1>Kavac Studio</h1>
-    <p>Calculadora para impresión Foam y DTF</p>
+  <img src="logo-kavac-studio.png" alt="Logo Kavac Studio" class="logo" />
+  <h1>Kavac Studio</h1>
+  <p>Calculadora para impresión Foam y DTF</p>
 
+  <div class="container">
     <label for="tipo">¿Qué deseas calcular?</label>
     <select id="tipo">
+      <option value="">Seleccionar...</option>
       <option value="foam">Imagen de Foam</option>
       <option value="dtf">Impresión DTF</option>
     </select>
 
-    <div id="formulario"></div>
-    <div id="output"></div>
+    <!-- Formulario Foam -->
+    <div id="foamForm" class="hidden">
+      <div id="figurasContainer"></div>
+      <button onclick="agregarFigura()">Agregar figura</button>
+      <button onclick="calcularFoam()">Calcular Foam</button>
+      <div id="resultadoFoam" class="resultado"></div>
+    </div>
+
+    <!-- Formulario DTF -->
+    <div id="dtfForm" class="hidden">
+      <label for="cantidadDtf">¿Cuántas imágenes?</label>
+      <input type="number" id="cantidadDtf" min="1" />
+      <label for="tamañoDtf">Tamaño de cada imagen (cm)</label>
+      <input type="number" id="tamañoDtf" min="1" />
+      <label for="anchoDtf">Ancho del lienzo</label>
+      <select id="anchoDtf">
+        <option value="29">29 cm</option>
+        <option value="58">58 cm</option>
+      </select>
+      <button onclick="calcularDTF()">Calcular DTF</button>
+      <div id="resultadoDtf" class="resultado"></div>
+    </div>
   </div>
 
-  <script src="main.js"></script>
   <script>
+    const tipo = document.getElementById('tipo');
+    const foamForm = document.getElementById('foamForm');
+    const dtfForm = document.getElementById('dtfForm');
+    const figurasContainer = document.getElementById('figurasContainer');
+
+    tipo.addEventListener('change', () => {
+      foamForm.classList.add('hidden');
+      dtfForm.classList.add('hidden');
+
+      if (tipo.value === 'foam') foamForm.classList.remove('hidden');
+      if (tipo.value === 'dtf') dtfForm.classList.remove('hidden');
+    });
+
+    function agregarFigura() {
+      const index = figurasContainer.children.length;
+      const div = document.createElement('div');
+      div.innerHTML = `
+        <div style="border-bottom:1px solid #ddd;padding:5px 0;">
+          <label>Figura ${index + 1}</label><br>
+          Alto (cm): <input type="number" name="alto" min="1" style="width:80px;" />
+          Ancho (cm): <input type="number" name="ancho" min="1" style="width:80px;" />
+          Cantidad: <input type="number" name="cantidad" min="1" style="width:60px;" />
+          <button onclick="this.parentNode.remove()">Eliminar</button>
+        </div>
+      `;
+      figurasContainer.appendChild(div);
+    }
+
+    function calcularFoam() {
+      const figuras = figurasContainer.querySelectorAll('div');
+      const precioCartonPluma = 12000;
+      const areaLamina = 2.4 * 1.2; // m2
+      const precioCartonPorM2 = precioCartonPluma / areaLamina;
+      const precioImpresionM2 = 11500;
+      const ganancia = 0.6;
+      let areaTotal = 0;
+      let detalles = "";
+
+      figuras.forEach((f, i) => {
+        const alto = parseFloat(f.querySelector('input[name="alto"]').value) / 100;
+        const ancho = parseFloat(f.querySelector('input[name="ancho"]').value) / 100;
+        const cantidad = parseInt(f.querySelector('input[name="cantidad"]').value);
+        const area = alto * ancho * cantidad;
+        areaTotal += area;
+        detalles += `🔹 Figura ${i+1}: ${cantidad} x ${Math.round(alto*100)}x${Math.round(ancho*100)}cm = ${area.toFixed(3)} m²\n`;
+      });
+
+      const costoMaterial = areaTotal * (precioCartonPorM2 + precioImpresionM2);
+      const gananciaValor = costoMaterial * ganancia;
+      const precioFinal = costoMaterial + gananciaValor;
+
+      document.getElementById('resultadoFoam').innerText = `
+🔸 Área total: ${areaTotal.toFixed(2)} m²
+🔸 Costo base: $${Math.round(costoMaterial).toLocaleString('es-CL')}
+🔸 Ganancia (60%): $${Math.round(gananciaValor).toLocaleString('es-CL')}
+🔸 Precio total: $${Math.round(precioFinal).toLocaleString('es-CL')}
+
+${detalles}`;
+    }
+
+    function calcularDTF() {
+      const cantidad = parseInt(document.getElementById('cantidadDtf').value);
+      const tamaño = parseInt(document.getElementById('tamañoDtf').value);
+      const ancho = parseInt(document.getElementById('anchoDtf').value);
+      const porFila = Math.floor(ancho / tamaño);
+      const filas = Math.ceil(cantidad / porFila);
+      const largo = filas * tamaño;
+      const precioPorMetro = ancho === 29 ? 9990 : 18990;
+      const metros = Math.ceil(largo / 100);
+      const precioTotal = metros * precioPorMetro;
+
+      document.getElementById('resultadoDtf').innerText = `Largo necesario: ${largo} cm\nPrecio estimado: $${precioTotal.toLocaleString('es-CL')}`;
+    }
+
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js');
+      navigator.serviceWorker.register('service-worker.js')
+        .then(() => console.log("Service Worker registrado"));
     }
   </script>
 </body>
