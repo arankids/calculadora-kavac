@@ -1,114 +1,50 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Calculadora Figuras en Foam</title>
+  <meta charset="UTF-8">
+  <title>Calculadora Kavac Studio</title>
   <style>
-  img.logo {
-  width: 150px;
-  display: block;
-  margin: 0 auto 20px auto;
-}
-.descripcion {
-  font-size: 1.1em;
-  color: #555;
-  text-align: center;
-  margin-bottom: 20px;
-}
     body {
-      
-      <img src="logo-kavac-studio.png" alt="Logo Kavac Studio" class="logo">
-
-<div class="descripcion">
-  Calculadora sencilla de precios para impresión, bordado y servicios de Kavac Studio.
-</div>
-      
-      
-      
       font-family: Arial, sans-serif;
       margin: 20px;
-      background-color: #f0f8f7;
+      background-color: #f9f9f9;
     }
 
-    .container {
+    .logo {
+      display: block;
+      margin: 0 auto;
+      width: 150px;
+    }
+
+    .descripcion {
+      text-align: center;
+      margin: 20px 0;
+      font-size: 18px;
+      color: #555;
+    }
+
+    .contenedor {
       max-width: 400px;
       margin: auto;
-      background: #fff;
+      background: white;
       padding: 20px;
       border-radius: 8px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
-
-    h2 {
-      text-align: center;
-      color: #00796B;
-    }
-
-    label {
-      display: block;
-      margin-top: 10px;
-    }
-
-    input {
-      width: 100%;
-      padding: 8px;
-      margin-top: 4px;
-      border-radius: 4px;
-      border: 1px solid #ccc;
-    }
-
-    button {
-      margin-top: 20px;
-      width: 100%;
-      padding: 10px;
-      background-color: #00796B;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      font-size: 16px;
-    }
-
-    #resultado {
-      margin-top: 20px;
-      font-weight: bold;
-      text-align: center;
-    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h2>Calculadora Kavac Studio</h2>
-    <label for="alto">Alto (cm):</label>
-    <input type="number" id="alto" />
 
-    <label for="ancho">Ancho (cm):</label>
-    <input type="number" id="ancho" />
+  <img src="logo-kavac-studio.png" alt="Logo Kavac Studio" class="logo">
 
-    <button onclick="calcular()">Calcular precio</button>
-
-    <div id="resultado"></div>
+  <div class="descripcion">
+    Calculadora para estimar costos de impresión, bordado y productos personalizados en Kavac Studio.
   </div>
 
-  <script>
-    function calcular() {
-      const alto = parseFloat(document.getElementById("alto").value) / 100;
-      const ancho = parseFloat(document.getElementById("ancho").value) / 100;
-      const area = alto * ancho;
+  <div class="contenedor">
+    <!-- Aquí puedes agregar tu formulario o calculadora más adelante -->
+    <p>¡Bienvenido! Próximamente podrás calcular tus pedidos aquí.</p>
+  </div>
 
-      const valorImpresion = 7500;
-      const valorLam = 8000;
-      const siliconBarras = 1500 / 3;
-      const transporte = 4000;
-
-      const precioImpresion = area * valorImpresion;
-      const porcentajeLam = area / (2.4 * 1.2);
-      const precioLam = porcentajeLam * valorLam;
-      const precioSilicon = siliconBarras;
-      const total = Math.ceil(precioImpresion + precioLam + precioSilicon + transporte);
-
-      document.getElementById("resultado").innerHTML = `Precio estimado: $${total.toLocaleString()}`;
-    }
-  </script>
 </body>
 </html>
