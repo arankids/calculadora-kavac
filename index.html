@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calculadora Kavac Studio</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f0f8f7;
+    }
+
+    .container {
+      max-width: 400px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      text-align: center;
+      color: #00796B;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+
+    input {
+      width: 100%;
+      padding: 8px;
+      margin-top: 4px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 10px;
+      background-color: #00796B;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+
+    #resultado {
+      margin-top: 20px;
+      font-weight: bold;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Calculadora Kavac Studio</h2>
+    <label for="alto">Alto (cm):</label>
+    <input type="number" id="alto" />
+
+    <label for="ancho">Ancho (cm):</label>
+    <input type="number" id="ancho" />
+
+    <button onclick="calcular()">Calcular precio</button>
+
+    <div id="resultado"></div>
+  </div>
+
+  <script>
+    function calcular() {
+      const alto = parseFloat(document.getElementById("alto").value) / 100;
+      const ancho = parseFloat(document.getElementById("ancho").value) / 100;
+      const area = alto * ancho;
+
+      const valorImpresion = 7500;
+      const valorLam = 8000;
+      const siliconBarras = 1500 / 3;
+      const transporte = 4000;
+
+      const precioImpresion = area * valorImpresion;
+      const porcentajeLam = area / (2.4 * 1.2);
+      const precioLam = porcentajeLam * valorLam;
+      const precioSilicon = siliconBarras;
+      const total = Math.ceil(precioImpresion + precioLam + precioSilicon + transporte);
+
+      document.getElementById("resultado").innerHTML = `Precio estimado: $${total.toLocaleString()}`;
+    }
+  </script>
+</body>
+</html>
