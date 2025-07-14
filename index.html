@@ -4,110 +4,127 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Kavac Studio</title>
-  <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="manifest" href="manifest.json" />
   <style>
     body {
       font-family: sans-serif;
-      background: #fdfdfd;
+      background: #fefefe;
       text-align: center;
-      padding: 20px;
+      color: #333;
     }
-    .logo {
-      width: 80px;
-      margin-bottom: 10px;
-    }
-    .container-box {
-      max-width: 700px;
+    .container {
+      max-width: 600px;
       margin: auto;
-      background: #fff;
-      padding: 20px;
-      border-radius: 20px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      padding: 1rem;
     }
-    .form-control.small {
-      max-width: 120px;
-      display: inline-block;
-      margin: 5px;
+    h1 {
+      color: #00b8b8;
+    }
+    select, input, button {
+      padding: 0.5rem;
+      margin: 0.5rem;
+      font-size: 1rem;
+    }
+    button {
+      background-color: #00b8b8;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    button:hover {
+      background-color: #009090;
     }
   </style>
 </head>
 <body>
-  <img src="logo.png" alt="Kavac Studio" class="logo">
-  <h1 style="color: #00b4b4;">Kavac Studio</h1>
-  <h4>Calculadora para impresión Foam y DTF</h4>
+  <div class="container">
+    <img src="logo.png" alt="Kavac Studio" width="80">
+    <h1>Kavac Studio</h1>
+    <p>Calculadora para impresión Foam y DTF</p>
 
-  <div class="container-box mt-4">
-    <div class="mb-3">
-      <label class="form-label"><strong>¿Qué deseas calcular?</strong></label>
-      <select class="form-select" id="tipoCalculo">
-        <option value="foam">Imagen de Foam</option>
-        <option value="dtf">Impresión DTF</option>
-      </select>
-    </div>
+    <label><strong>¿Qué deseas calcular?</strong></label>
+    <select id="tipoCalculo" onchange="cambiarFormulario()">
+      <option value="foam">Imagen de Foam</option>
+      <option value="dtf">Impresión DTF</option>
+    </select>
 
-    <div id="formularioFoam">
-      <input class="form-control small" placeholder="Alto (cm)" id="altoFoam">
-      <input class="form-control small" placeholder="Ancho (cm)" id="anchoFoam">
-      <input class="form-control small" placeholder="Cantidad" id="cantidadFoam">
-      <br>
-      <button class="btn btn-info mt-2" onclick="calcularFoam()">Calcular Foam</button>
-      <p id="resultadoFoam" class="mt-3"></p>
-    </div>
-
-    <div id="formularioDTF" style="display: none;">
-      <input class="form-control small" placeholder="Alto (cm)" id="altoDTF">
-      <input class="form-control small" placeholder="Ancho (cm)" id="anchoDTF">
-      <input class="form-control small" placeholder="Cantidad" id="cantidadDTF">
-      <select class="form-select mt-2" id="anchoLienzo">
-        <option value="29">Ancho 29 cm</option>
-        <option value="58">Ancho 58 cm</option>
-      </select>
-      <button class="btn btn-info mt-2" onclick="calcularDTF()">Calcular DTF</button>
-      <p id="resultadoDTF" class="mt-3"></p>
-    </div>
+    <div id="formulario"></div>
+    <div id="resultado"></div>
   </div>
 
   <script>
-    document.getElementById('tipoCalculo').addEventListener('change', function () {
-      const tipo = this.value;
-      document.getElementById('formularioFoam').style.display = tipo === 'foam' ? 'block' : 'none';
-      document.getElementById('formularioDTF').style.display = tipo === 'dtf' ? 'block' : 'none';
-    });
+    const foamPrecioImpresion = 11500; // por m²
+    const foamGanancia = 0.6;
+    const foamPrecioPliego = 12000; // por pliego 2.4 x 1.2m
+
+    const dtfPrecio29 = 9990;  // por metro lineal
+    const dtfPrecio58 = 18990; // por metro lineal
+
+    function cambiarFormulario() {
+      const tipo = document.getElementById('tipoCalculo').value;
+      const form = document.getElementById('formulario');
+      const resultado = document.getElementById('resultado');
+      resultado.innerHTML = '';
+      if (tipo === 'foam') {
+        form.innerHTML = `
+          <input type="number" id="alto" placeholder="Alto (cm)" />
+          <input type="number" id="ancho" placeholder="Ancho (cm)" />
+          <input type="number" id="cantidad" placeholder="Cantidad" />
+          <button onclick="calcularFoam()">Calcular Foam</button>
+        `;
+      } else {
+        form.innerHTML = `
+          <input type="number" id="anchoImg" placeholder="Ancho (cm)" />
+          <input type="number" id="altoImg" placeholder="Alto (cm)" />
+          <input type="number" id="cantidadImg" placeholder="Cantidad" />
+          <select id="anchoLienzo">
+            <option value="29">Ancho lienzo: 29 cm</option>
+            <option value="58">Ancho lienzo: 58 cm</option>
+          </select>
+          <button onclick="calcularDTF()">Calcular DTF</button>
+        `;
+      }
+    }
 
     function calcularFoam() {
-      const alto = parseFloat(document.getElementById('altoFoam').value);
-      const ancho = parseFloat(document.getElementById('anchoFoam').value);
-      const cantidad = parseInt(document.getElementById('cantidadFoam').value);
-      if (isNaN(alto) || isNaN(ancho) || isNaN(cantidad)) {
-        alert('Completa todos los campos');
-        return;
-      }
-      const area = (alto / 100) * (ancho / 100) * cantidad;
-      const costoBase = area * 11500;
-      const ganancia = costoBase * 0.6;
-      const total = costoBase + ganancia;
-      document.getElementById('resultadoFoam').textContent = `Total estimado: $${total.toFixed(0).toLocaleString('es-CL')}`;
+      const alto = parseFloat(document.getElementById('alto').value) / 100;
+      const ancho = parseFloat(document.getElementById('ancho').value) / 100;
+      const cantidad = parseInt(document.getElementById('cantidad').value);
+      const areaTotal = alto * ancho * cantidad;
+      const costoBase = areaTotal * foamPrecioImpresion;
+      const ganancia = costoBase * foamGanancia;
+      const precioFinal = costoBase + ganancia;
+      document.getElementById('resultado').innerHTML = `
+        <h3>Total estimado: $${precioFinal.toFixed(0)}</h3>
+        <p>Área: ${areaTotal.toFixed(2)} m²</p>
+        <p>Costo base: $${costoBase.toFixed(0)}</p>
+        <p>Ganancia (60%): $${ganancia.toFixed(0)}</p>
+      `;
     }
 
     function calcularDTF() {
-      const alto = parseFloat(document.getElementById('altoDTF').value);
-      const ancho = parseFloat(document.getElementById('anchoDTF').value);
-      const cantidad = parseInt(document.getElementById('cantidadDTF').value);
+      const anchoImg = parseFloat(document.getElementById('anchoImg').value);
+      const altoImg = parseFloat(document.getElementById('altoImg').value);
+      const cantidad = parseInt(document.getElementById('cantidadImg').value);
       const anchoLienzo = parseInt(document.getElementById('anchoLienzo').value);
-      if (isNaN(alto) || isNaN(ancho) || isNaN(cantidad)) {
-        alert('Completa todos los campos');
-        return;
-      }
-      const imagenAncho = ancho;
-      const imagenAlto = alto;
-      const porFila = Math.floor(anchoLienzo / imagenAncho);
-      const filas = Math.ceil(cantidad / porFila);
-      const largoNecesario = filas * imagenAlto;
-      const precioPorMetro = anchoLienzo === 29 ? 9990 : 18990;
-      const precioFinal = (largoNecesario / 100) * precioPorMetro;
-      document.getElementById('resultadoDTF').textContent = `Largo necesario: ${largoNecesario} cm | Total: $${precioFinal.toFixed(0).toLocaleString('es-CL')}`;
+
+      const imagenesPorFila = Math.floor(anchoLienzo / anchoImg);
+      const filasNecesarias = Math.ceil(cantidad / imagenesPorFila);
+      const largoNecesario = filasNecesarias * altoImg;
+
+      const precioPorMetro = anchoLienzo === 29 ? dtfPrecio29 : dtfPrecio58;
+      const largoEnMetros = largoNecesario / 100;
+      const precioFinal = largoEnMetros * precioPorMetro;
+
+      document.getElementById('resultado').innerHTML = `
+        <h3>Total estimado: $${precioFinal.toFixed(0)}</h3>
+        <p>Alto total requerido: ${largoNecesario.toFixed(1)} cm</p>
+        <p>Imágenes por fila: ${imagenesPorFila}</p>
+      `;
     }
+
+    cambiarFormulario(); // inicial
   </script>
 </body>
 </html>
